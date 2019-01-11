@@ -821,8 +821,8 @@ typedef struct
 	int		inAction;	// controls whether should we even consider starting one
 	int		duration;	// how long each trail seg stays in existence
 	int		lastTime;	// time a saber segement was last stored
-	vec3_t	base;
-	vec3_t	tip;
+	vec3_t	base, dualbase;
+	vec3_t	tip, dualtip;
 
 	// Marks stuff
 	qboolean	haveOldPos[2];
@@ -838,7 +838,9 @@ typedef struct
 		saved_game.write<int32_t>(duration);
 		saved_game.write<int32_t>(lastTime);
 		saved_game.write<float>(base);
+		saved_game.write<float>(dualbase);
 		saved_game.write<float>(tip);
+		saved_game.write<float>(dualtip);
 		saved_game.write<int32_t>(haveOldPos);
 		saved_game.write<float>(oldPos);
 		saved_game.write<float>(oldNormal);
@@ -851,7 +853,9 @@ typedef struct
 		saved_game.read<int32_t>(duration);
 		saved_game.read<int32_t>(lastTime);
 		saved_game.read<float>(base);
+		saved_game.read<float>(dualbase);
 		saved_game.read<float>(tip);
+		saved_game.read<float>(dualtip);
 		saved_game.read<int32_t>(haveOldPos);
 		saved_game.read<float>(oldPos);
 		saved_game.read<float>(oldNormal);
