@@ -714,6 +714,9 @@ typedef struct cgameImport_s {
 	qboolean		(*G2API_OverrideServer)					( void *serverInstance );
 	void			(*G2API_GetSurfaceName)					( void *ghoul2, int surfNumber, int modelIndex, char *fillBuf );
 
+	void			(*Angles_GetView)						( vec3_t viewangles );
+	void			(*Angles_SetView)						( const vec3_t viewangles );
+
 	struct {
 		float			(*R_Font_StrLenPixels)					( const char *text, const int iFontIndex, const float scale );
 	} ext;

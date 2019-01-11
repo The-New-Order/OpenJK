@@ -1695,6 +1695,16 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 // Stub function for old RMG system.
 static void RE_InitRendererTerrain ( const char * /*info*/ ) {}
 
+static void CL_GetViewAngles( vec3_t viewangles )
+{
+	VectorCopy( cl.viewangles, viewangles );
+}
+
+static void CL_SetViewAngles( const vec3_t viewangles )
+{
+	VectorCopy( viewangles, cl.viewangles );
+}
+
 void CL_BindCGame( void ) {
 	static cgameImport_t cgi;
 	cgameExport_t		*ret;
@@ -1909,6 +1919,8 @@ void CL_BindCGame( void ) {
 		cgi.G2API_CleanEntAttachments			= CL_G2API_CleanEntAttachments;
 		cgi.G2API_OverrideServer				= CL_G2API_OverrideServer;
 		cgi.G2API_GetSurfaceName				= CL_G2API_GetSurfaceName;
+		cgi.Angles_GetView						= CL_GetViewAngles;
+		cgi.Angles_SetView						= CL_SetViewAngles;
 
 		cgi.ext.R_Font_StrLenPixels				= re->ext.Font_StrLenPixels;
 

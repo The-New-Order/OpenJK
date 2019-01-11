@@ -1830,8 +1830,12 @@ Caused by an EV_FIRE_WEAPON event
 */
 void CG_FireWeapon( centity_t *cent, qboolean altFire ) {
 	entityState_t *ent;
+	const entityState_t *s = &cent->currentState;
 	int				c;
 	weaponInfo_t	*weap;
+
+	vec3_t viewangles;
+	trap->Angles_GetView(viewangles);
 
 	ent = &cent->currentState;
 	if ( ent->weapon == WP_NONE ) {
@@ -1955,6 +1959,27 @@ void CG_FireWeapon( centity_t *cent, qboolean altFire ) {
 			}
 		}
 	}
+	
+	if ( s->number == cg.snap->ps.clientNum )
+	{
+	    double pitchRecoil = 1.1f;
+	    if ( pitchRecoil )
+	    {
+	        double yawRecoil = flrand (0.15 * pitchRecoil, 0.25 * pitchRecoil);
+	        
+	        if ( Q_irand (0, 1) )
+	        {
+	            yawRecoil = -yawRecoil;
+	        }
+	        
+	        CGCam_Shake (flrand (0.85f * pitchRecoil, 0.15f * pitchRecoil), 100);
+	        
+	        viewangles[YAW] += yawRecoil;
+	        viewangles[PITCH] -= pitchRecoil;
+	    }
+	}
+
+	trap->Angles_SetView(viewangles);
 }
 
 qboolean CG_VehicleWeaponImpact( centity_t *cent )
