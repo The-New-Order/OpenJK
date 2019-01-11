@@ -430,6 +430,26 @@ void CL_ShutdownCGame( void ) {
 //	cgvm = NULL;
 }
 
+/*
+====================
+CL_GetViewAngles
+
+====================
+*/
+void CL_GetViewAngles( vec3_t viewangles ) {
+    VectorCopy( cl.viewangles, viewangles );
+}
+
+/*
+====================
+CL_SetViewAngles
+
+====================
+*/
+void CL_SetViewAngles( const vec3_t viewangles ) {
+    VectorCopy( viewangles, cl.viewangles );
+}
+
 #ifdef JK2_MODE
 /*
 ====================
@@ -1199,6 +1219,13 @@ Ghoul2 Insert End
 	case CG_UI_STRING_INIT:
 		String_Init();
 		return 0;
+
+	case CG_ANGLES_GETVIEW:
+	    CL_GetViewAngles(  (float *) VMA(1) );
+	    return 0;
+	case CG_ANGLES_SETVIEW:
+	    CL_SetViewAngles( (const float *) VMA(1) );
+	    return 0;
 
 	case CG_UI_GETMENUINFO:
 		menuDef_t *menu;

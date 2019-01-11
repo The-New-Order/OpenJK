@@ -2742,7 +2742,11 @@ Caused by an EV_FIRE_WEAPON event
 void CG_FireWeapon( centity_t *cent, qboolean alt_fire )
 {
 	entityState_t *ent;
+	const entityState_t *s = &cent->currentState;
+	vec3_t viewangles;
 	//weaponInfo_t	*weap;
+
+	cgi_Angles_GetView(viewangles);
 
 	ent = &cent->currentState;
 	if ( ent->weapon == WP_NONE ) {
@@ -2829,6 +2833,28 @@ void CG_FireWeapon( centity_t *cent, qboolean alt_fire )
 			}
 		}
 	}*/
+
+	if ( s->number == cg.snap->ps.clientNum )
+	{
+		double pitchRecoil = weaponData[ent->weapon].recoil;
+		
+	    if ( pitchRecoil )
+	    {
+	        double yawRecoil = flrand (0.15 * pitchRecoil, 0.25 * pitchRecoil);
+
+	        if ( Q_irand (0, 1) )
+	        {
+	            yawRecoil = -yawRecoil;
+	        }
+
+	        CGCam_Shake (flrand (0.85f * pitchRecoil, 0.15f * pitchRecoil), 100);
+
+	        viewangles[YAW] += yawRecoil;
+	        viewangles[PITCH] -= pitchRecoil;
+	    }
+	}
+
+	cgi_Angles_SetView(viewangles);
 }
 
 /*

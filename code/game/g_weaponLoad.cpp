@@ -162,6 +162,8 @@ void WPN_SplashRadius(const char **holdBuf);
 void WPN_AltSplashDamage(const char **holdBuf);
 void WPN_AltSplashRadius(const char **holdBuf);
 
+void WPN_GunRecoil(const char **holdBuf);
+
 // Legacy weapons.dat force fields
 void WPN_FuncSkip(const char **holdBuf);
 
@@ -441,6 +443,7 @@ wpnParms_t WpnParms[] =
 	{ "splashRadius",		WPN_SplashRadius },
 	{ "altSplashDamage",	WPN_AltSplashDamage },
 	{ "altSplashRadius",	WPN_AltSplashRadius },
+	{ "recoil",				WPN_GunRecoil },
 
 	// Old legacy files contain these, so we skip them to shut up warnings
 	{ "firingforce",		WPN_FuncSkip },
@@ -1432,6 +1435,25 @@ void WPN_AltSplashRadius(const char **holdBuf)
 	}
 
 	weaponData[wpnParms.weaponNum].altSplashRadius = tokenFlt;
+}
+
+//--------------------------------------------
+void WPN_GunRecoil(const char **holdBuf)
+{
+    float        tokenInt;
+
+    if ( COM_ParseFloat(holdBuf,&tokenInt))
+    {
+        SkipRestOfLine(holdBuf);
+        return;
+    }
+
+    if ((tokenInt < 0) || (tokenInt > 10000 ))
+    {
+        gi.Printf(S_COLOR_YELLOW"WARNING: bad recoil in external weapon data '%d'\n", tokenInt);
+        return;
+    }
+    weaponData[wpnParms.weaponNum].recoil = tokenInt;
 }
 
 //--------------------------------------------

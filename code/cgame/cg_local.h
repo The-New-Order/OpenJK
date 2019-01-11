@@ -1095,6 +1095,8 @@ void		cgi_AS_ParseSets( void );
 void		cgi_AS_AddPrecacheEntry( const char *name );
 int			cgi_S_AddLocalSet( const char *name, vec3_t listener_origin, vec3_t origin, int entID, int time );
 sfxHandle_t	cgi_AS_GetBModelSound( const char *name, int stage );
+void 		cgi_Angles_GetView( vec3_t viewangles );
+void 		cgi_Angles_SetView( const vec3_t viewangles );
 
 
 void CG_DrawMiscEnts(void);

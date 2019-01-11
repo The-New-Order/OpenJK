@@ -156,6 +156,7 @@ typedef struct weaponData_s
 	int		altSplashDamage;
 	float	splashRadius;
 	float	altSplashRadius;
+	float	recoil;
 
 } weaponData_t;
 
