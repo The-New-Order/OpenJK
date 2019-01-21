@@ -14212,6 +14212,8 @@ extern void ForceRage( gentity_t *self );
 extern void ForceProtect( gentity_t *self );
 extern void ForceAbsorb( gentity_t *self );
 extern void ForceSeeing( gentity_t *self );
+extern void ForceSeeingInfrared(gentity_t *self);
+
 void PM_CheckForceUseButton( gentity_t *ent, usercmd_t *ucmd  )
 {
 	if ( !ent )
@@ -14253,6 +14255,9 @@ void PM_CheckForceUseButton( gentity_t *ent, usercmd_t *ucmd  )
 				break;
 			case FP_SEE:		//duration - detect/see hidden enemies
 				ForceSeeing( ent );
+				break;
+			case FP_INFRARED:
+				ForceSeeingInfrared(ent);
 				break;
 			}
 		}

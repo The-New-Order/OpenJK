@@ -322,6 +322,7 @@ SetForceCmd SetForceTable[NUM_FORCE_POWERS] = {
 	{ "forceAbsorb",		"setForceAbsorb",		FORCE_LEVEL_3			},
 	{ "forceDrain",			"setForceDrain",		FORCE_LEVEL_3			},
 	{ "forceSight",			"setForceSight",		FORCE_LEVEL_3			},
+	{ "forceInfrared",		"setForceInfrared",		FORCE_LEVEL_3			},
 };
 
 static void Svcmd_ForceSetLevel_f( int forcePower )
@@ -924,6 +925,7 @@ static svcmd_t svcmds[] = {
 	{ "setForceProtect",			Svcmd_ForceSetLevel_f<FP_PROTECT>,			CMD_CHEAT },
 	{ "setForceAbsorb",				Svcmd_ForceSetLevel_f<FP_ABSORB>,			CMD_CHEAT },
 	{ "setForceSight",				Svcmd_ForceSetLevel_f<FP_SEE>,				CMD_CHEAT },
+	{ "setForceInfrared",			Svcmd_ForceSetLevel_f<FP_INFRARED>,			CMD_CHEAT },
 	{ "setForceAll",				Svcmd_SetForceAll_f,						CMD_CHEAT },
 	{ "setSaberAll",				Svcmd_SetSaberAll_f,						CMD_CHEAT },
 	

@@ -4464,7 +4464,7 @@ static void UI_UpdateFightingStyleChoices ( void )
 }
 #endif // !JK2_MODE
 
-#define MAX_POWER_ENUMS 16
+#define MAX_POWER_ENUMS 17
 
 typedef struct {
 	const char	*title;
@@ -4497,6 +4497,9 @@ static powerEnum_t powerEnums[MAX_POWER_ENUMS] =
 	{ "sabdef",		FP_SABER_DEFENSE },
 	{ "saboff",		FP_SABER_OFFENSE },
 	{ "sabthrow",		FP_SABERTHROW },
+#ifndef JK2_MODE
+	{ "infrare",	FP_INFRARED },
+#endif // !JK2_MODE
 
 				// Dark powers
 #ifndef JK2_MODE
@@ -4776,6 +4779,8 @@ static void	UI_DemoSetForceLevels( void )
 		uiInfo.forcePowerLevel[FP_DRAIN]=0;
 		uiInfo.forcePowerLevel[FP_LIGHTNING]=0;
 		uiInfo.forcePowerLevel[FP_RAGE]=0;
+
+		uiInfo.forcePowerLevel[FP_INFRARED]=0;
 	}
 	else
 	{
@@ -4801,6 +4806,8 @@ static void	UI_DemoSetForceLevels( void )
 		uiInfo.forcePowerLevel[FP_ABSORB]=0;
 		uiInfo.forcePowerLevel[FP_DRAIN]=0;
 		uiInfo.forcePowerLevel[FP_RAGE]=0;
+
+		uiInfo.forcePowerLevel[FP_INFRARED]=0;
 	}
 
 	if (pState)
@@ -4814,6 +4821,8 @@ static void	UI_DemoSetForceLevels( void )
 		uiInfo.forcePowerLevel[FP_ABSORB]=Q_max(pState->forcePowerLevel[FP_ABSORB], uiInfo.forcePowerLevel[FP_ABSORB]);
 		uiInfo.forcePowerLevel[FP_DRAIN]=Q_max(pState->forcePowerLevel[FP_DRAIN], uiInfo.forcePowerLevel[FP_DRAIN]);
 		uiInfo.forcePowerLevel[FP_RAGE]=Q_max(pState->forcePowerLevel[FP_RAGE], uiInfo.forcePowerLevel[FP_RAGE]);
+
+		uiInfo.forcePowerLevel[FP_INFRARED]=Q_max(pState->forcePowerLevel[FP_INFRARED], uiInfo.forcePowerLevel[FP_INFRARED]);
 	}
 }
 #endif // !JK2_MODE

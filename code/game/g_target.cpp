@@ -999,6 +999,7 @@ void set_mission_stats_cvars( void )
 	gi.cvar_set("ui_stats_lightning", va("%d",client->sess.missionStats.forceUsed[FP_LIGHTNING]));
 	gi.cvar_set("ui_stats_rage", va("%d",client->sess.missionStats.forceUsed[FP_RAGE]));
 
+	gi.cvar_set("ui_stats_infrared", va("%d",client->sess.missionStats.forceUsed[FP_INFRARED]));
 }
 
 #include "../cgame/cg_media.h"	//access to cgs

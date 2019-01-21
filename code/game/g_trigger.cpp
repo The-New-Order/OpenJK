@@ -1630,6 +1630,10 @@ void trigger_visible_check_player_visibility( gentity_t *self )
 		{
 			return;
 		}
+		if ( !( player->client->ps.forcePowersActive & (1 << FP_INFRARED) ) )
+		{
+			return;
+		}
 	}
 
 	//1: see if player is within 512*512 range

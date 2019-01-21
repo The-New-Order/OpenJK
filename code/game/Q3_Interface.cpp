@@ -419,6 +419,7 @@ stringID_table_t setTable[] =
 	ENUM2STRING(SET_FORCE_ABSORB_LEVEL),
 	ENUM2STRING(SET_FORCE_DRAIN_LEVEL),
 	ENUM2STRING(SET_FORCE_SIGHT_LEVEL),
+	ENUM2STRING(SET_FORCE_INFRARED_LEVEL),
 	ENUM2STRING(SET_SABER1_COLOR1),
 	ENUM2STRING(SET_SABER1_COLOR2),
 	ENUM2STRING(SET_SABER2_COLOR1),
@@ -485,6 +486,7 @@ stringID_table_t setTable[] =
 	ENUM2STRING(SET_FORCE_PROTECT),
 	ENUM2STRING(SET_FORCE_ABSORB),
 	ENUM2STRING(SET_FORCE_DRAIN),
+	ENUM2STRING(SET_FORCE_INFRARED),
 	ENUM2STRING(SET_WINTER_GEAR),
 	ENUM2STRING(SET_NO_ANGLES),
 	ENUM2STRING(SET_SABER_ORIGIN),
@@ -9440,6 +9442,7 @@ extern void LockDoors(gentity_t *const ent);
 	case SET_FORCE_ABSORB_LEVEL:
 	case SET_FORCE_DRAIN_LEVEL:
 	case SET_FORCE_SIGHT_LEVEL:
+	case SET_FORCE_INFRARED_LEVEL:
 		int_data = atoi((char *) data);
 		Q3_SetForcePowerLevel( entID, (toSet-SET_FORCE_HEAL_LEVEL), int_data );
 		break;
@@ -9528,6 +9531,10 @@ extern void Saboteur_Cloak( gentity_t *self );
 	case SET_FORCE_DRAIN:
 		Q3_SetForcePower( entID, FP_DRAIN, (qboolean)(Q_stricmp("true",(char*)data)==0) );
 		break;
+	case SET_FORCE_INFRARED:
+		Q3_SetForcePower( entID, FP_INFRARED, (qboolean)(Q_stricmp("true",(char*)data)==0) );
+		break;
+
 
 extern cvar_t	*g_char_model;
 extern cvar_t	*g_char_skin_head;

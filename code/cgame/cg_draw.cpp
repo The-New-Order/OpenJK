@@ -3980,6 +3980,10 @@ static void CG_Draw2D( void )
 		CG_DrawPic( 0, 0, 640, 480, cgi_R_RegisterShader( "gfx/2d/jsense" ));
 		CG_DrawHealthBars();
 	}
+	if ( (cg.snap->ps.forcePowersActive&(1<<FP_INFRARED)) )
+	{
+		CG_DrawPic(0, 0, 640, 480, cgi_R_RegisterShader("gfx/2d/infrared"));
+	}
 	else if ( cg_debugHealthBars.integer )
 	{
 		CG_DrawHealthBars();
@@ -4278,6 +4282,11 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	}
 
 	if ( (cg.snap->ps.forcePowersActive&(1<<FP_SEE)) )
+	{
+		cg.refdef.rdflags |= RDF_ForceSightOn;
+	}
+
+	if ( (cg.snap->ps.forcePowersActive&(1<<FP_INFRARED)) )
 	{
 		cg.refdef.rdflags |= RDF_ForceSightOn;
 	}

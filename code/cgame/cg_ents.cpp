@@ -36,6 +36,7 @@ extern void CG_AddSaberBlade( centity_t *cent, centity_t *scent, refEntity_t *sa
 extern void CG_CheckSaberInWater( centity_t *cent, centity_t *scent, int saberNum, int modelIndex, vec3_t origin, vec3_t angles );
 extern void CG_ForcePushBlur( const vec3_t org, qboolean darkSide = qfalse );
 extern void CG_AddForceSightShell( refEntity_t *ent, centity_t *cent );
+extern void CG_AddForceInfraredShell( refEntity_t *ent, centity_t *cent) ;
 extern qboolean CG_PlayerCanSeeCent( centity_t *cent );
 extern cvar_t	*debug_subdivision;
 
@@ -864,6 +865,20 @@ Ghoul2 Insert End
 			CG_AddForceSightShell( &ent, cent );
 		}
 	}
+	if ((cg.snap->ps.forcePowersActive & (1 << FP_INFRARED))
+		&& cg.snap->ps.clientNum != cent->currentState.number
+		&& CG_PlayerCanSeeCent( cent ) )
+	{//so player can see dark missiles/explosives
+		if ( s1->weapon == WP_THERMAL
+			|| s1->weapon == WP_DET_PACK
+			|| s1->weapon == WP_TRIP_MINE
+			|| (cent->gent&&cent->gent->e_UseFunc==useF_ammo_power_converter_use)
+			|| (cent->gent&&cent->gent->e_UseFunc==useF_shield_power_converter_use)
+			|| (s1->eFlags&EF_FORCE_VISIBLE) )
+		{//really, we only need to do this for things like thermals, detpacks and tripmines, no?
+			CG_AddForceInfraredShell(&ent, cent);
+		}
+	}
 }
 
 /*
@@ -1066,6 +1081,13 @@ Ghoul2 Insert End
 		&& CG_PlayerCanSeeCent( cent ) )
 	{
 		CG_AddForceSightShell( &ent, cent );
+	}
+
+	if ((cg.snap->ps.forcePowersActive & (1 << FP_INFRARED))
+		&& cg.snap->ps.clientNum != cent->currentState.number
+		&& CG_PlayerCanSeeCent( cent ) )
+	{
+		CG_AddForceInfraredShell(&ent, cent);
 	}
 
 	if ( item->giType == IT_WEAPON
@@ -1279,6 +1301,18 @@ Ghoul2 Insert End
 			CG_AddForceSightShell( &ent, cent );
 		}
 	}
+	if ((cg.snap->ps.forcePowersActive & (1 << FP_INFRARED))
+		&& cg.snap->ps.clientNum != cent->currentState.number
+		&& CG_PlayerCanSeeCent( cent ) )
+	{//so player can see dark missiles/explosives
+		if ( s1->weapon == WP_THERMAL
+			|| s1->weapon == WP_DET_PACK
+			|| s1->weapon == WP_TRIP_MINE
+			|| (s1->eFlags&EF_FORCE_VISIBLE) )
+		{//really, we only need to do this for things like thermals, detpacks and tripmines, no?
+			CG_AddForceInfraredShell(&ent, cent);
+		}
+	}
 }
 
 /*
@@ -1402,6 +1436,13 @@ Ghoul2 Insert End
 		&& (s1->eFlags&EF_FORCE_VISIBLE) )
 	{//so player can see func_breakables
 		CG_AddForceSightShell( &ent, cent );
+	}
+
+	if ((cg.snap->ps.forcePowersActive & (1 << FP_INFRARED))
+		&& cg.snap->ps.clientNum != cent->currentState.number
+		&& (s1->eFlags&EF_FORCE_VISIBLE) )
+	{//so player can see func_breakables
+		CG_AddForceInfraredShell(&ent, cent);
 	}
 }
 

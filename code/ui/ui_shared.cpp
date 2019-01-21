@@ -5502,6 +5502,7 @@ static const char *g_bindCommands[] = {
 	"force_pull",
 #ifndef JK2_MODE
 	"force_rage",
+	"force_infrared",
 	"force_sight",
 #endif
 	"force_speed",

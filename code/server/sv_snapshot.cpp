@@ -377,6 +377,13 @@ static void SV_AddEntitiesVisibleFromPoint( vec3_t origin, clientSnapshot_t *fra
 			sightOn = qtrue;
 		}
 	}
+	if ( !portal )
+	{//not if this if through a portal...???  James said to do this...
+		if ( (frame->ps.forcePowersActive&(1<<FP_INFRARED)) )
+		{
+			sightOn = qtrue;
+		}
+	}
 #endif // !JK2_MODE
 
 	for ( e = 0 ; e < ge->num_entities ; e++ ) {
@@ -431,6 +438,14 @@ static void SV_AddEntitiesVisibleFromPoint( vec3_t origin, clientSnapshot_t *fra
 		if ( sightOn )
 		{//force sight is on, sees through portals, so draw them always if in radius
 			if ( SV_PlayerCanSeeEnt( ent, frame->ps.forcePowerLevel[FP_SEE] ) )
+			{//entity is visible
+				SV_AddEntToSnapshot( svEnt, ent, eNums );
+				continue;
+			}
+		}
+		if ( sightOn )
+		{//force sight is on, sees through portals, so draw them always if in radius
+			if ( SV_PlayerCanSeeEnt( ent, frame->ps.forcePowerLevel[FP_INFRARED] ) )
 			{//entity is visible
 				SV_AddEntToSnapshot( svEnt, ent, eNums );
 				continue;

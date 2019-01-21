@@ -4500,6 +4500,71 @@ qboolean CG_PlayerCanSeeCent( centity_t *cent )
 
 /*
 ===============
+CG_PlayerCanSeeCentInfrared
+tests infrared sight level
+===============
+*/
+qboolean CG_PlayerCanSeeCentInfrared(centity_t *cent)
+{
+	// if ((cent->currentState.eFlags & EF_FORCE_VISIBLE))
+	// {
+	// 	return qtrue;
+	// }
+
+	// if (g_entities[0].client->ps.forcePowerLevel[FP_INFRARED] < FORCE_LEVEL_2 && cent->currentState.eType != ET_PLAYER)
+	// { //TEST: level 1 only sees force hints and enemies
+	// 	return qfalse;
+	// }
+
+	float dot = 0.25f; //1.0f;
+	float range = 512.0f;
+
+	switch (g_entities[0].client->ps.forcePowerLevel[FP_INFRARED])
+	{
+	case FORCE_LEVEL_1:
+		//dot = 0.95f;
+		range = 1024.0f;
+		break;
+	case FORCE_LEVEL_2:
+		//dot = 0.7f;
+		range = 2048.0f;
+		break;
+	case FORCE_LEVEL_3:
+	case FORCE_LEVEL_4:
+	case FORCE_LEVEL_5:
+		//dot = 0.4f;
+		range = 4096.0f;
+		break;
+	}
+
+	vec3_t centDir, lookDir;
+	VectorSubtract(cent->lerpOrigin, cg.refdef.vieworg, centDir);
+	float centDist = VectorNormalize(centDir);
+
+	if (centDist < 128.0f)
+	{ //can always see them if they're really close
+		return qtrue;
+	}
+
+	if (centDist > range)
+	{ //too far away to see them
+		return qfalse;
+	}
+
+	dot += (0.99f - dot) * centDist / range; //the farther away they are, the more in front they have to be
+
+	AngleVectors(cg.refdefViewAngles, lookDir, NULL, NULL);
+
+	if (DotProduct(centDir, lookDir) < dot)
+	{ //not in force sight cone
+		return qfalse;
+	}
+
+	return qtrue;
+}
+
+/*
+===============
 CG_AddForceSightShell
 
 Adds the special effect
@@ -4595,6 +4660,62 @@ void CG_AddForceSightShell( refEntity_t *ent, centity_t *cent )
 	//FIXME: make it darker or more translucent the further away it is?
 
 	cgi_R_AddRefEntityToScene( ent );
+}
+
+/*
+===============
+CG_AddForceInfraredShell
+Adds the special effect
+===============
+*/
+void CG_AddForceInfraredShell(refEntity_t *ent, centity_t *cent)
+{
+	ent->customShader = cgs.media.forceShell;
+	ent->renderfx &= ~RF_RGB_TINT;
+	ent->renderfx |= (RF_MORELIGHT | RF_NODEPTH);
+
+	if ( (cent->currentState.eFlags&EF_FORCE_VISIBLE)
+		|| (cent->currentState.eType == ET_PLAYER && cent->gent && cent->gent->message) )
+	{
+		ent->shaderRGBA[0] = 255;
+		ent->shaderRGBA[1] = 155;
+		ent->shaderRGBA[2] = 0;
+		ent->shaderRGBA[3] = 254;
+
+		cgi_R_AddRefEntityToScene( ent );
+		return;
+	}
+
+	team_t team = TEAM_NEUTRAL;
+	if ( cent->gent && cent->gent->client )
+	{
+		team = cent->gent->client->playerTeam;
+	}
+	else if ( cent->gent && cent->gent->owner )
+	{
+		if ( cent->gent->owner->client )
+		{
+			team = cent->gent->owner->client->playerTeam;
+		}
+		else
+		{
+			team = cent->gent->owner->noDamageTeam;
+		}
+	}
+	switch ( team )
+	{
+		case TEAM_ENEMY:
+		case TEAM_PLAYER:
+		case TEAM_FREE:
+			ent->shaderRGBA[0] = 255;
+			ent->shaderRGBA[1] = 155;
+			ent->shaderRGBA[2] = 0;
+			break;
+		default:
+			break;
+	}
+
+	cgi_R_AddRefEntityToScene(ent);
 }
 
 /*
@@ -4703,6 +4824,12 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, centity_t *cen
 		{//just draw him
 			cgi_R_AddRefEntityToScene( ent );
 		}
+		if ((cg.snap->ps.forcePowersActive & (1 << FP_INFRARED))
+			&& cg.snap->ps.clientNum != cent->currentState.number
+			&& CG_PlayerCanSeeCentInfrared( cent ))
+		{//just draw him
+			cgi_R_AddRefEntityToScene( ent );
+		}
 		else
 		{
 			float perc = (float)(gent->client->ps.powerups[PW_UNCLOAKING] - cg.time) / 2000.0f;
@@ -4734,6 +4861,12 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, centity_t *cen
 		if ((cg.snap->ps.forcePowersActive & (1 << FP_SEE))
 			&& cg.snap->ps.clientNum != cent->currentState.number
 			&& CG_PlayerCanSeeCent( cent ))
+		{//just draw him
+			cgi_R_AddRefEntityToScene( ent );
+		}
+		if ((cg.snap->ps.forcePowersActive & (1 << FP_INFRARED))
+			&& cg.snap->ps.clientNum != cent->currentState.number
+			&& CG_PlayerCanSeeCentInfrared( cent ))
 		{//just draw him
 			cgi_R_AddRefEntityToScene( ent );
 		}
@@ -5018,6 +5151,17 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, centity_t *cen
 		)
 	{//force sight draws auras around living things
 		CG_AddForceSightShell( ent, cent );
+	}
+
+	if ((cg.snap->ps.forcePowersActive & (1 << FP_INFRARED))
+		&& (cent->currentState.eFlags&EF_FORCE_VISIBLE
+			|| ((cent->gent->health > 0 || cent->gent->message )
+			&& cent->currentState.eType == ET_PLAYER//other things handle this in their own render funcs
+			&& CG_PlayerCanSeeCentInfrared( cent ))
+			)
+		)
+	{//force sight draws auras around living things
+		CG_AddForceInfraredShell(ent, cent);
 	}
 
 	//temp stuff for drain

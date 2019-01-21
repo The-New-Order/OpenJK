@@ -189,6 +189,7 @@ int forcePowerDarkLight[NUM_FORCE_POWERS] = //0 == neutral
 	FORCE_LIGHTSIDE,//FP_ABSORB,//duration
 	FORCE_DARKSIDE,//FP_DRAIN,//hold/duration
 	0,//FP_SEE,//duration
+	0,//FP_INFRARED
 	//NUM_FORCE_POWERS
 };
 
@@ -210,7 +211,8 @@ int forcePowerNeeded[NUM_FORCE_POWERS] =
 	30,//FP_PROTECT,//duration - protect against physical/energy (level 1 stops blaster/energy bolts, level 2 stops projectiles, level 3 protects against explosions)
 	30,//FP_ABSORB,//duration - protect against dark force powers (grip, lightning, drain)
 	1,//FP_DRAIN,//hold/duration - drain force power for health
-	20//FP_SEE,//duration - detect/see hidden enemies
+	20,//FP_SEE,//duration - detect/see hidden enemies
+	10,//FP_INFRARED
 	//NUM_FORCE_POWERS
 };
 
@@ -10034,7 +10036,8 @@ void WP_DebounceForceDeactivateTime( gentity_t *self )
 			|| self->client->ps.forcePowersActive&(1<<FP_PROTECT)
 			|| self->client->ps.forcePowersActive&(1<<FP_ABSORB)
 			|| self->client->ps.forcePowersActive&(1<<FP_RAGE)
-			|| self->client->ps.forcePowersActive&(1<<FP_SEE) )
+			|| self->client->ps.forcePowersActive&(1<<FP_SEE)
+			|| self->client->ps.forcePowersActive&(1<<FP_INFRARED) )
 		{//already running another power that can be manually, stopped don't debounce so long
 			self->client->ps.forceAllowDeactivateTime = level.time + 500;
 		}
@@ -12065,6 +12068,32 @@ void ForceSeeing( gentity_t *self )
 	G_SoundOnEnt( self, CHAN_ITEM, "sound/weapons/force/see.wav" );
 }
 
+void ForceSeeingInfrared(gentity_t *self)
+{
+	if (self->health <= 0)
+	{
+		return;
+	}
+
+	if (self->client->ps.forceAllowDeactivateTime < level.time &&
+		(self->client->ps.forcePowersActive & (1 << FP_INFRARED)))
+	{
+		WP_ForcePowerStop(self, FP_INFRARED);
+		return;
+	}
+
+	if (!WP_ForcePowerUsable(self, FP_INFRARED, 0))
+	{
+		return;
+	}
+
+	WP_DebounceForceDeactivateTime(self);
+
+	WP_ForcePowerStart(self, FP_INFRARED, 0);
+
+	G_SoundOnEnt(self, CHAN_ITEM, "sound/weapons/force/see.wav");
+}
+
 void ForceProtect( gentity_t *self )
 {
 	if ( self->health <= 0 )
@@ -12774,6 +12803,24 @@ void WP_ForcePowerStart( gentity_t *self, forcePowers_t forcePower, int override
 		G_SoundOnEnt( self, CHAN_ITEM, "sound/weapons/force/see.mp3" );
 		self->s.loopSound = G_SoundIndex( "sound/weapons/force/seeloop.wav" );
 		break;
+	case FP_INFRARED:
+		if (self->client->ps.forcePowerLevel[FP_INFRARED] == FORCE_LEVEL_1)
+		{
+			duration = 5000;
+		}
+		else if (self->client->ps.forcePowerLevel[FP_INFRARED] == FORCE_LEVEL_2)
+		{
+			duration = 10000;
+		}
+		else
+		{
+			duration = 1000000;
+		}
+
+		self->client->ps.forcePowersActive |= (1 << forcePower);
+		G_SoundOnEnt(self, CHAN_ITEM, "sound/weapons/force/see.mp3");
+		self->s.loopSound = G_SoundIndex("sound/weapons/force/seeloop.wav");
+		break;
 	default:
 		break;
 	}
@@ -13297,6 +13344,9 @@ void WP_ForcePowerStop( gentity_t *self, forcePowers_t forcePower )
 		}
 		break;
 	case FP_SEE:
+		self->s.loopSound = 0;
+		break;
+	case FP_INFRARED:
 		self->s.loopSound = 0;
 		break;
 	default:
@@ -14152,6 +14202,8 @@ static void WP_ForcePowerRun( gentity_t *self, forcePowers_t forcePower, usercmd
 		break;
 	case FP_SEE:
 		break;
+	case FP_INFRARED:
+		break;
 	default:
 		break;
 	}
@@ -14237,6 +14289,8 @@ void WP_CheckForcedPowers( gentity_t *self, usercmd_t *ucmd )
 				break;
 			case FP_SEE:
 				//nothing
+				break;
+			case FP_INFRARED:
 				break;
 			}
 		}
@@ -14415,7 +14469,7 @@ void WP_InitForcePowers( gentity_t *ent )
 		}
 		else
 		{
-			ent->client->ps.forcePowersKnown = ( 1 << FP_HEAL )|( 1 << FP_LEVITATION )|( 1 << FP_SPEED )|( 1 << FP_PUSH )|( 1 << FP_PULL )|( 1 << FP_TELEPATHY )|( 1 << FP_GRIP )|( 1 << FP_LIGHTNING)|( 1 << FP_SABERTHROW)|( 1 << FP_SABER_DEFENSE )|( 1 << FP_SABER_OFFENSE )|( 1<< FP_RAGE )|( 1<< FP_DRAIN )|( 1<< FP_PROTECT )|( 1<< FP_ABSORB )|( 1<< FP_SEE );
+			ent->client->ps.forcePowersKnown = ( 1 << FP_HEAL )|( 1 << FP_LEVITATION )|( 1 << FP_SPEED )|( 1 << FP_PUSH )|( 1 << FP_PULL )|( 1 << FP_TELEPATHY )|( 1 << FP_GRIP )|( 1 << FP_LIGHTNING)|( 1 << FP_SABERTHROW)|( 1 << FP_SABER_DEFENSE )|( 1 << FP_SABER_OFFENSE )|( 1<< FP_RAGE )|( 1<< FP_DRAIN )|( 1<< FP_PROTECT )|( 1<< FP_ABSORB )|( 1<< FP_SEE )|( 1<< FP_INFRARED );
 			ent->client->ps.forcePowerLevel[FP_HEAL] = FORCE_LEVEL_2;
 			ent->client->ps.forcePowerLevel[FP_LEVITATION] = FORCE_LEVEL_2;
 			ent->client->ps.forcePowerLevel[FP_PUSH] = FORCE_LEVEL_1;
@@ -14434,6 +14488,8 @@ void WP_InitForcePowers( gentity_t *ent )
 			ent->client->ps.forcePowerLevel[FP_SABER_DEFENSE] = FORCE_LEVEL_3;
 			ent->client->ps.forcePowerLevel[FP_SABER_OFFENSE] = FORCE_LEVEL_3;
 			ent->client->ps.forcePowerLevel[FP_GRIP] = FORCE_LEVEL_2;
+
+			ent->client->ps.forcePowerLevel[FP_INFRARED] = FORCE_LEVEL_1;
 		}
 	}
 }

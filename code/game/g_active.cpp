@@ -4694,6 +4694,8 @@ extern void ForceSeeing(gentity_t *ent);
 extern void ForceTelepathy(gentity_t *ent);
 extern void ForceAbsorb(gentity_t *ent);
 extern void ForceHeal(gentity_t *ent);
+extern void ForceSeeingInfrared(gentity_t *ent);
+
 static void ProcessGenericCmd(gentity_t *ent, byte cmd)
 {
 	switch(cmd) {
@@ -4734,6 +4736,9 @@ static void ProcessGenericCmd(gentity_t *ent, byte cmd)
 		break;
 	case GENCMD_FORCE_SEEING:
 		ForceSeeing(ent);
+		break;
+	case GENCMD_FORCE_INFRARED:
+		ForceSeeingInfrared(ent);
 		break;
 	}
 }
