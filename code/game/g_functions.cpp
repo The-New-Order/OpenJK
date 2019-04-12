@@ -329,7 +329,8 @@ void GEntity_UseFunc(gentity_t *self, gentity_t *other, gentity_t *activator)
 	USECASE( NPC_VehicleSpawnUse )
 	USECASE( misc_weapon_shooter_use )
 	USECASE( eweb_use )
-	USECASE( TieFighterUse );
+	USECASE( TieFighterUse )
+	USECASE( radar_icon_use );
 
 	default:
 		Com_Error(ERR_DROP, "GEntity_UseFunc: case %d not handled!\n",self->e_UseFunc);

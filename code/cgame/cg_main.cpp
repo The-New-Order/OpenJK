@@ -341,6 +341,8 @@ vmCvar_t	cg_fovViewmodelAdjust;
 
 vmCvar_t	cg_scaleVehicleSensitivity;
 
+vmCvar_t	cg_drawRadar;
+
 vmCvar_t	cg_SFXSabers;
 vmCvar_t	cg_SFXSabersGlowSize;
 vmCvar_t	cg_SFXSabersCoreSize;
@@ -423,6 +425,8 @@ static cvarTable_t cvarTable[] = {
 	{ &cg_thirdPersonVertOffset, "cg_thirdPersonVertOffset", "16", 0},
 	{ &cg_thirdPersonCameraDamp, "cg_thirdPersonCameraDamp", "0.3", 0},
 	{ &cg_thirdPersonTargetDamp, "cg_thirdPersonTargetDamp", "0.5", 0},
+
+	{ &cg_drawRadar,	"cg_drawRadar", "1", CVAR_ARCHIVE },
 
 	{ &cg_thirdPersonHorzOffset, "cg_thirdPersonHorzOffset", "0", 0},
 	{ &cg_thirdPersonAlpha, "cg_thirdPersonAlpha", "1.0", CVAR_ARCHIVE },
@@ -1355,6 +1359,11 @@ static void CG_RegisterGraphics( void ) {
 		cgs.media.chunkyNumberShaders[i]	= cgi_R_RegisterShaderNoMip( sb_c_nums[i] );
 	}
 
+	cgs.media.radarShader = cgi_R_RegisterShaderNoMip("gfx/menus/radar/radar.png");
+	cgs.media.siegeItemShader = cgi_R_RegisterShaderNoMip("gfx/menus/radar/goalitem");
+	cgs.media.mAutomapPlayerIcon = cgi_R_RegisterShaderNoMip("gfx/menus/radar/arrow_w");
+	cgs.media.mAutomapRocketIcon = cgi_R_RegisterShaderNoMip("gfx/menus/radar/rocket");
+
 	// FIXME: conditionally do this??  Something must be wrong with inventory item caching..?
 	cgi_R_RegisterModel( "models/items/remote.md3" );
 
@@ -1767,6 +1776,20 @@ Ghoul2 Insert End
 
 		// Send off the terrainInfo to the renderer
 		cgi_RE_InitRendererTerrain( terrainInfo );
+	}
+
+	const char *iconName;
+
+	for (i = 1; i < MAX_ICONS; i++)
+	{
+		iconName = (char *)CG_ConfigString(CS_ICONS + i);
+
+		if (!iconName[0])
+		{
+			break;
+		}
+
+		cgs.media.radarIcons[i] = cgi_R_RegisterShaderNoMip(iconName);
 	}
 }
 

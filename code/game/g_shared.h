@@ -1658,6 +1658,8 @@ Ghoul2 Insert End
 		saved_game.read<int32_t>(forcePushTime);
 		saved_game.read<int32_t>(forcePuller);
 	}
+
+	char		*radarIcon;
 };
 #endif //#ifdef GAME_INCLUDE
 

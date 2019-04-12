@@ -642,6 +642,8 @@ typedef struct {
 
 #define MAX_FX				128
 
+#define MAX_ICONS			64
+
 #ifdef JK2_MODE
 #define MAX_WORLD_FX (4)
 #else
@@ -721,6 +723,7 @@ Ghoul2 Insert End
 #define CS_DYNAMIC_MUSIC_STATE	(CS_CHARSKINS + MAX_CHARSKINS)
 #define CS_WORLD_FX				(CS_DYNAMIC_MUSIC_STATE + 1)
 #define CS_MAX					(CS_WORLD_FX + MAX_WORLD_FX)
+#define CS_ICONS				(CS_WORLD_FX + MAX_WORLD_FX)	
 
 #if (CS_MAX) > MAX_CONFIGSTRINGS
 #error overflow: (CS_MAX) > MAX_CONFIGSTRINGS
@@ -1608,6 +1611,7 @@ public:
 								// used to twist the legs during strafing
 
 	int			eFlags;			// copied to entityState_t->eFlags
+	int			eFlags2;
 
 	int			eventSequence;	// pmove generated events
 	int			events[MAX_PS_EVENTS];
@@ -2384,6 +2388,7 @@ typedef struct entityState_s {// !!!!!!!!!!! LOADSAVE-affecting struct !!!!!!!!!
 	int		number;			// entity index
 	int		eType;			// entityType_t
 	int		eFlags;
+	int		eFlags2;
 
 	trajectory_t	pos;	// for calculating position
 	trajectory_t	apos;	// for calculating angles
@@ -2568,6 +2573,10 @@ Ghoul2 Insert End
 		saved_game.read<int32_t>(isPortalEnt);
 #endif // !JK2_MODE
 	}
+
+	int radarIcon;
+	int		genericenemyindex;
+
 } entityState_t;
 
 

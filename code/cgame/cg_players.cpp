@@ -7483,6 +7483,7 @@ extern qboolean G_GetRootSurfNameWithVariant( gentity_t *ent, const char *rootSu
 extern qboolean G_ControlledByPlayer( gentity_t *self );
 extern qboolean G_RagDoll(gentity_t *ent, vec3_t forcedAngles);
 int	cg_saberOnSoundTime[MAX_GENTITIES] = {0};
+extern void CG_AddRadarEnt(centity_t * cent);
 
 void CG_Player( centity_t *cent ) {
 	clientInfo_t	*ci;
@@ -7533,6 +7534,8 @@ void CG_Player( centity_t *cent ) {
 	{
 		return;
 	}
+
+	CG_AddRadarEnt(cent);
 
 	G_RagDoll(cent->gent, cent->lerpAngles);
 

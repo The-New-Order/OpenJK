@@ -813,6 +813,7 @@ void WP_FireVehicleWeapon( gentity_t *ent, vec3_t start, vec3_t dir, vehWeaponIn
 						}
 						missile->e_ThinkFunc = thinkF_rocketThink;
 						missile->nextthink = level.time + VEH_HOMING_MISSILE_THINK_TIME;
+						missile->s.eFlags2 |= EF2_RADAROBJECT;
 						//FIXME: implement radar in SP?
 						//missile->s.eFlags |= EF_RADAROBJECT;
 					}

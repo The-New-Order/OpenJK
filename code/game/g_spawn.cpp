@@ -615,6 +615,7 @@ void SP_point_combat (gentity_t *self);
 
 void SP_emplaced_eweb( gentity_t *self );
 void SP_emplaced_gun( gentity_t *self );
+void SP_misc_radar_icon(gentity_t *self);
 
 void SP_misc_turbobattery( gentity_t *base );
 
@@ -856,6 +857,8 @@ spawn_t	spawns[] = {
 
 	{"emplaced_gun", SP_emplaced_gun},
 	{"emplaced_eweb", SP_emplaced_eweb},
+
+	{ "misc_radar_icon", SP_misc_radar_icon },
 
 	{NULL, NULL}
 };

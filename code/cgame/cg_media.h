@@ -136,6 +136,14 @@ typedef struct {
 	qhandle_t	loadTick;
 	qhandle_t	loadTickCap;
 
+	//Radar
+	qhandle_t radarShader;
+	qhandle_t siegeItemShader;
+	qhandle_t mAutomapPlayerIcon;
+	qhandle_t mAutomapRocketIcon;
+
+	qhandle_t radarIcons[MAX_ICONS];
+
 	//			HUD artwork
 	int			currentBackground;
 	qhandle_t	weaponbox;

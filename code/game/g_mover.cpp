@@ -2203,6 +2203,13 @@ void SP_func_static( gentity_t *ent )
 		ent->svFlags |= SVF_BROADCAST; // I need to rotate something that is huge and it's touching too many area portals...
 	}
 
+	if (ent->radarIcon && ent->radarIcon[0])
+	{
+		ent->svFlags |= SVF_BROADCAST;
+		ent->s.eFlags2 |= EF2_RADAROBJECT;
+		ent->s.radarIcon = G_IconIndex(ent->radarIcon);
+	}
+
 	if ( ent->spawnflags & 4/*SWITCH_SHADER*/ )
 	{
 		ent->s.eFlags |= EF_SHADER_ANIM;//use frame-controlled shader anim
@@ -2351,6 +2358,12 @@ void SP_func_rotating (gentity_t *ent) {
 	{
 		ent->e_TouchFunc = touchF_func_rotating_touch;
 		G_SoundIndex( "sound/effects/energy_crackle.wav" );
+	}
+	if ((ent->spawnflags & 2))//RADAR
+	{//show up on Radar at close range and play impact sound when close...?  Range based on my size
+		ent->speed = Distance(ent->absmin, ent->absmax)*0.5f;
+		ent->svFlags |= SVF_BROADCAST;
+		ent->s.eFlags2 |= EF2_RADAROBJECT;
 	}
 
 	gi.linkentity( ent );

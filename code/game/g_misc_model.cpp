@@ -473,6 +473,9 @@ void SP_misc_model_gun_rack( gentity_t *ent )
 	G_SetAngles( ent, ent->s.angles );
 
 	ent->contents = CONTENTS_SOLID;
+	ent->svFlags |= SVF_BROADCAST;
+	ent->s.eFlags2 |= EF2_RADAROBJECT;
+	ent->s.genericenemyindex = G_IconIndex("gfx/mp/siegeicons/desert/weapon_recharge");
 
 	gi.linkentity( ent );
 }
@@ -549,6 +552,9 @@ void SP_misc_model_ammo_rack( gentity_t *ent )
 	G_SetAngles( ent, ent->s.angles );
 
 	ent->contents = CONTENTS_SHOTCLIP|CONTENTS_PLAYERCLIP|CONTENTS_MONSTERCLIP|CONTENTS_BOTCLIP;//CONTENTS_SOLID;//so use traces can go through them
+	ent->svFlags |= SVF_BROADCAST;
+	ent->s.eFlags2 |= EF2_RADAROBJECT;
+	ent->s.genericenemyindex = G_IconIndex("gfx/mp/siegeicons/desert/weapon_recharge");
 
 	gi.linkentity( ent );
 }

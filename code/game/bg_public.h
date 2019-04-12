@@ -240,6 +240,7 @@ typedef enum {
 #define EF_FORCE_GRIPPED		0x20000000	// Force gripped effect
 #define EF_FORCE_DRAINED		0x40000000	// Force drained effect
 #define EF_BLOCKED_MOVER		0x80000000	// for movers that are blocked - shared with previous
+#define	EF2_RADAROBJECT		    (1<<0)		// Being held by something, like a Rancor or a Wampa
 
 typedef enum {
 	PW_NONE,

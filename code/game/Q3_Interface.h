@@ -331,6 +331,9 @@ typedef enum //# setType_e
 	//in-bhc tables
 	SET_LEAN,//## %t="LEAN_TYPES" # Lean left, right or stop leaning
 
+		SET_RADAR_ICON,
+		SET_RADAR_OBJECT,
+
 	//# #eol
 	SET_
 } setType_t;
