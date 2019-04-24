@@ -102,6 +102,12 @@ typedef enum //# ammo_e
 	AMMO_MAX
 } ammo_t;
 
+enum
+{
+	FT_AUTOMATIC = 1,
+	FT_SEMI,
+	FT_BURST
+};
 
 typedef struct weaponData_s
 {
@@ -156,6 +162,9 @@ typedef struct weaponData_s
 	int		altSplashDamage;
 	float	splashRadius;
 	float	altSplashRadius;
+	int		burstFireDelay;
+	int		shotsPerBurst;
+	int		firingType;
 
 } weaponData_t;
 
