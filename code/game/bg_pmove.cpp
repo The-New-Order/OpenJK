@@ -13907,6 +13907,21 @@ static void PM_Weapon( void )
 
 	pm->ps->weaponstate = WEAPON_FIRING;
 
+	if (pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && pm->cmd.buttons & BUTTON_ATTACK)
+	{
+		if (pm->ps->shotsRemaining & SHOTS_TOGGLEBIT)
+		{
+			if (weaponData[pm->ps->weapon].firingType == FT_SEMI)
+			{
+				return;
+			}
+			else if (weaponData[pm->ps->weapon].firingType == FT_BURST)
+			{
+				pm->ps->shotsRemaining = weaponData[pm->ps->weapon].shotsPerBurst & ~SHOTS_TOGGLEBIT;
+			}
+		}
+	}
+
 	// take an ammo away if not infinite
 	if ( pm->ps->ammo[ weaponData[pm->ps->weapon].ammoIndex ] != -1 )
 	{
@@ -14013,6 +14028,32 @@ static void PM_Weapon( void )
 		if(pm->gent && pm->gent->NPC != NULL )
 		{//NPCs have their own refire logic
 			return;
+		}
+	}
+
+	if (pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && pm->cmd.buttons & BUTTON_ATTACK)
+	{
+		switch (weaponData[pm->ps->weapon].firingType)
+		{
+			case FT_AUTOMATIC:
+				addTime = weaponData[pm->ps->weapon].fireTime;
+				break;
+			case FT_SEMI:
+				addTime = weaponData[pm->ps->weapon].fireTime;
+				pm->ps->shotsRemaining = SHOTS_TOGGLEBIT;
+				break;
+			case FT_BURST:
+				if ((pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT) == 1)
+				{	
+					addTime = weaponData[pm->ps->weapon].fireTime;
+					pm->ps->shotsRemaining = SHOTS_TOGGLEBIT;
+				}
+				else
+				{
+					addTime = weaponData[pm->ps->weapon].burstFireDelay;
+					pm->ps->shotsRemaining = (pm->ps->shotsRemaining - 1) & ~SHOTS_TOGGLEBIT;
+				}
+				break;
 		}
 	}
 
@@ -14409,6 +14450,8 @@ void PM_AdjustAttackStates( pmove_t *pm )
 {
 	int amount;
 
+	qboolean primFireDown;
+
 	if ( !g_saberAutoBlocking->integer
 		&& !g_saberNewControlScheme->integer
 		&& (pm->cmd.buttons&BUTTON_FORCE_FOCUS) )
@@ -14417,6 +14460,18 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		pm->cmd.buttons &= ~BUTTON_ATTACK;
 		pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
 	}
+
+	if (pm->gent 
+		&& (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent))
+		&& pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT 
+		&& pm->ps->eFlags & EF_FIRING 
+		&& weaponData[pm->ps->weapon].firingType == FT_BURST)
+	{
+		pm->cmd.buttons |= BUTTON_ATTACK;
+	}
+
+	primFireDown = (qboolean)(pm->cmd.buttons & BUTTON_ATTACK);
+
 	// get ammo usage
 	if ( pm->cmd.buttons & BUTTON_ALT_ATTACK )
 	{
@@ -14534,6 +14589,28 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		pm->cmd.buttons &= ~(BUTTON_ALT_ATTACK|BUTTON_ATTACK);
 	}
 
+	if ( !(pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT) 
+		&& (primFireDown && !(pm->ps->eFlags & EF_FIRING)) )
+	{
+		if (pm->ps->weaponTime <= 0)
+		{
+			if (weaponData[pm->ps->weapon].firingType == FT_BURST)
+			{
+				pm->ps->shotsRemaining = weaponData[pm->ps->weapon].shotsPerBurst & ~SHOTS_TOGGLEBIT;
+			}
+		}
+		else
+		{
+			pm->cmd.buttons &= ~BUTTON_ATTACK;
+			primFireDown =  qfalse;
+		}
+	}
+
+	if (weaponData[pm->ps->weapon].firingType < FT_AUTOMATIC)
+	{
+		pm->ps->shotsRemaining = 0;
+	}
+
 	// set the firing flag for continuous beam weapons, phaser will fire even if out of ammo
 	if ( (( pm->cmd.buttons & BUTTON_ATTACK || pm->cmd.buttons & BUTTON_ALT_ATTACK ) && ( amount >= 0 || pm->ps->weapon == WP_SABER )) )
 	{
@@ -14564,6 +14641,11 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		// Clear 'em out
 		pm->ps->eFlags &= ~EF_FIRING;
 		pm->ps->eFlags &= ~EF_ALT_FIRING;
+
+		if (weaponData[pm->ps->weapon].firingType == FT_SEMI && pm->ps->shotsRemaining & SHOTS_TOGGLEBIT)
+		{
+			pm->ps->shotsRemaining = 0;
+		}
 
 		// if I don't check the flags before stopping FX then it switches them off too often, which tones down
 		//	the stronger FFFX so you can hardly feel them. However, if you only do iton these flags then the
