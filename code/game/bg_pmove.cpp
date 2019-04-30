@@ -146,6 +146,7 @@ extern cvar_t	*g_debugMelee;
 extern cvar_t	*g_saberNewControlScheme;
 extern cvar_t	*g_stepSlideFix;
 extern cvar_t	*g_saberAutoBlocking;
+extern int defaultDamageCopy[WP_NUM_WEAPONS];
 
 static void PM_SetWaterLevelAtPoint( vec3_t org, int *waterlevel, int *watertype );
 
@@ -13934,6 +13935,10 @@ static void PM_Weapon( void )
 		{
 			amount = FT_BURST_ENERGY_SHOT;
 		}
+		else if (pm->ps->firingMode == 1 && weaponData[pm->ps->weapon].firingType == FT_HIGH_POWERED)
+		{
+			amount = FT_HIGH_POWERED_ENERGY_SHOT;
+		}
 		else
 		{
 			amount = weaponData[pm->ps->weapon].energyPerShot;
@@ -14100,7 +14105,20 @@ static void PM_Weapon( void )
 						pm->ps->shotsRemaining = (pm->ps->shotsRemaining - 1) & ~SHOTS_TOGGLEBIT;
 					}
 					break;
+				case FT_HIGH_POWERED:
+					for (int i = 0; i < WP_NUM_WEAPONS; i++)
+					{
+						weaponData[i].altDamage = FT_HIGH_POWERED_DAMAGE;
+					}
+					break;
 			}
+		}
+	}
+	else
+	{
+		for (int i = 0; i < WP_NUM_WEAPONS; i++)
+		{
+			weaponData[i].altDamage = defaultDamageCopy[i];
 		}
 	}
 
@@ -14763,15 +14781,23 @@ void PM_AdjustAttackStates( pmove_t *pm )
 
 	if ( pm->ps->weapon != WP_DISRUPTOR && pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && weaponData[pm->ps->weapon].scopeType >= SCOPE_A280 )
 	{
-		if ( pm->cmd.buttons & BUTTON_ATTACK && cg.zoomMode >= SCOPE_A280 )
+		if ( pm->cmd.buttons & BUTTON_ATTACK && cg.zoomMode < SCOPE_A280 && pm->ps->firingMode == 1 && weaponData[pm->ps->weapon].firingType == FT_HIGH_POWERED )
 		{
-			pm->cmd.buttons |= BUTTON_ALT_ATTACK;
-			pm->ps->eFlags |= EF_ALT_FIRING;
+			pm->cmd.buttons &= ~BUTTON_ATTACK;
+		}
+		else if ( pm->cmd.buttons & BUTTON_ATTACK && cg.zoomMode >= SCOPE_A280 )
+		{
+			pm->cmd.buttons |= BUTTON_ATTACK;
+			pm->ps->eFlags |= EF_FIRING;
 		}
 		else
 		{
 			pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
 		}
+	}
+	else if (weaponData[pm->ps->weapon].firingType >= FT_AUTOMATIC && weaponData[pm->ps->weapon].scopeType < SCOPE_A280)
+	{
+		pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
 	}
 }
 

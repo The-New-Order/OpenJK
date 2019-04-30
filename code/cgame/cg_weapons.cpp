@@ -932,7 +932,14 @@ static void CG_DoMuzzleFlash( centity_t *cent, vec3_t org, vec3_t dir, weaponDat
 				}
 				else
 				{
-					effect = &wData->mMuzzleEffect[0];
+					if (cent->gent->client->ps.firingMode == 1)
+					{
+						effect = &wData->mAltMuzzleEffect[0];
+					}
+					else
+					{
+						effect = &wData->mMuzzleEffect[0];
+					}
 				}
 			}
 			else

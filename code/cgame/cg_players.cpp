@@ -7755,7 +7755,14 @@ extern vmCvar_t	cg_thirdPersonAlpha;
 						}
 						else
 						{
-							effect = &wData->mMuzzleEffect[0];
+							if (cent->gent->client->ps.firingMode == 1)
+							{
+								effect = &wData->mAltMuzzleEffect[0];
+							}
+							else
+							{
+								effect = &wData->mMuzzleEffect[0];
+							}
 						}
 					}
 					else
