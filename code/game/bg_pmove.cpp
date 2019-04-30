@@ -8921,6 +8921,10 @@ static void PM_BeginWeaponChange( int weapon ) {
 			cg.zoomMode = 0;
 			cg.zoomTime = cg.time;
 		}
+		else if ( cg.zoomMode >= SCOPE_A280 )
+		{
+			cg.zoomMode = 0;
+		} 
 	}
 
 	if ( pm->gent
@@ -13806,7 +13810,15 @@ static void PM_Weapon( void )
 				break;
 
 			case WP_BLASTER:
-				PM_SetAnim( pm, SETANIM_TORSO, BOTH_ATTACK3, SETANIM_FLAG_OVERRIDE|SETANIM_FLAG_HOLD|SETANIM_FLAG_RESTART);
+				if ( ((pm->ps->clientNum >= MAX_CLIENTS&&!PM_ControlledByPlayer())&& pm->gent && pm->gent->NPC && (pm->gent->NPC->scriptFlags&SCF_ALT_FIRE)) ||
+					((pm->ps->clientNum < MAX_CLIENTS||PM_ControlledByPlayer()) && cg.zoomMode >= SCOPE_A280 ) )
+				{
+					PM_SetAnim( pm, SETANIM_TORSO, BOTH_ATTACK4, SETANIM_FLAG_OVERRIDE|SETANIM_FLAG_HOLD );
+				}
+				else
+				{
+					PM_SetAnim( pm, SETANIM_TORSO, BOTH_ATTACK3, SETANIM_FLAG_OVERRIDE|SETANIM_FLAG_HOLD|SETANIM_FLAG_RESTART);
+				}
 				break;
 
 			case WP_DISRUPTOR:
@@ -14562,6 +14574,39 @@ void PM_AdjustAttackStates( pmove_t *pm )
 
 	}
 
+	if ( pm->ps->weapon != WP_DISRUPTOR && pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && pm->ps->weaponstate != WEAPON_DROPPING && weaponData[pm->ps->weapon].scopeType >= SCOPE_A280 )
+	{
+		if ( !(pm->ps->eFlags & EF_ALT_FIRING) && (pm->cmd.buttons & BUTTON_ALT_ATTACK) )
+		{
+			if ( cg.zoomMode == 0 )
+			{
+				switch ( weaponData[pm->ps->weapon].scopeType )
+				{
+					case SCOPE_A280:
+						cg.zoomMode = SCOPE_A280;
+						cg_zoomFov = 15.0f;
+						break;
+					case SCOPE_WESTAR_M5:
+						cg.zoomMode = SCOPE_WESTAR_M5;
+						cg_zoomFov = 20.0f;
+						break;
+					case SCOPE_BOWCASTER:
+						cg.zoomMode = SCOPE_BOWCASTER;
+						cg_zoomFov = 25.0f;
+						break;
+					case SCOPE_DLT_20A:
+						cg.zoomMode = SCOPE_DLT_20A;
+						cg_zoomFov = 10.0f;
+						break;
+				}
+			}
+			else if ( cg.zoomMode >= SCOPE_A280 )
+			{
+				cg.zoomMode = 0;
+			}
+		}
+	}
+
 	// Check for binocular specific mode
 	if ( cg.zoomMode == 1 && pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) ) //
 	{
@@ -14671,6 +14716,18 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		else
 		{
 			// don't let an alt-fire through
+			pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
+		}
+	}
+	if ( pm->ps->weapon != WP_DISRUPTOR && pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && weaponData[pm->ps->weapon].scopeType >= SCOPE_A280 )
+	{
+		if ( pm->cmd.buttons & BUTTON_ATTACK && cg.zoomMode >= SCOPE_A280 )
+		{
+			pm->cmd.buttons |= BUTTON_ALT_ATTACK;
+			pm->ps->eFlags |= EF_ALT_FIRING;
+		}
+		else
+		{
 			pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
 		}
 	}
