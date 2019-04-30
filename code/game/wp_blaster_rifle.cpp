@@ -25,6 +25,7 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 #include "g_functions.h"
 #include "wp_saber.h"
 #include "w_local.h"
+#include "../cgame/cg_local.h"
 
 
 //---------------
@@ -115,12 +116,20 @@ void WP_FireBlasterMissile( gentity_t *ent, vec3_t start, vec3_t dir, qboolean a
 void WP_FireBlaster( gentity_t *ent, qboolean alt_fire )
 //---------------------------------------------------------
 {
-	vec3_t	dir, angs;
+	vec3_t	dir, angs, angles;
 
 	vectoangles( forwardVec, angs );
 
 	if ( ent->client && ent->client->NPC_class == CLASS_VEHICLE )
 	{//no inherent aim screw up
+	}
+	else if ( alt_fire && cg.zoomMode >= SCOPE_A280 )
+	{
+		AngleVectors( ent->client->renderInfo.eyeAngles, forwardVec, NULL, NULL );
+		vectoangles( forwardVec, angles );
+
+		angles[PITCH] += Q_flrand(-1.0f, 1.0f) * SCOPE_SPREAD;
+		angles[YAW]   += Q_flrand(-1.0f, 1.0f) * SCOPE_SPREAD;
 	}
 	else if ( !(ent->client->ps.forcePowersActive&(1<<FP_SEE))
 		|| ent->client->ps.forcePowerLevel[FP_SEE] < FORCE_LEVEL_2 )
@@ -152,8 +161,16 @@ void WP_FireBlaster( gentity_t *ent, qboolean alt_fire )
 		}
 	}
 
-	AngleVectors( angs, dir, NULL, NULL );
+	if ( alt_fire && cg.zoomMode >= SCOPE_A280 )
+	{
+		AngleVectors( angles, forwardVec, NULL, NULL );
+		WP_FireBlasterMissile( ent, ent->client->renderInfo.eyePoint, forwardVec, alt_fire );
+	}
+	else
+	{
+		AngleVectors( angs, dir, NULL, NULL );
 
-	// FIXME: if temp_org does not have clear trace to inside the bbox, don't shoot!
-	WP_FireBlasterMissile( ent, muzzle, dir, alt_fire );
+		// FIXME: if temp_org does not have clear trace to inside the bbox, don't shoot!
+		WP_FireBlasterMissile( ent, muzzle, dir, alt_fire );
+	}
 }
