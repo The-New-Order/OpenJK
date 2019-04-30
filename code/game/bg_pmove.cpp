@@ -146,6 +146,7 @@ extern cvar_t	*g_debugMelee;
 extern cvar_t	*g_saberNewControlScheme;
 extern cvar_t	*g_stepSlideFix;
 extern cvar_t	*g_saberAutoBlocking;
+extern vmCvar_t cg_firingOption;
 
 static void PM_SetWaterLevelAtPoint( vec3_t org, int *waterlevel, int *watertype );
 
@@ -8925,6 +8926,8 @@ static void PM_BeginWeaponChange( int weapon ) {
 		{
 			cg.zoomMode = 0;
 		} 
+
+		gi.SendConsoleCommand("cg_firingOption 0");
 	}
 
 	if ( pm->gent
@@ -13919,17 +13922,20 @@ static void PM_Weapon( void )
 
 	pm->ps->weaponstate = WEAPON_FIRING;
 
-	if (pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && pm->cmd.buttons & BUTTON_ATTACK)
+	if (cg_firingOption.integer == 1)
 	{
-		if (pm->ps->shotsRemaining & SHOTS_TOGGLEBIT)
+		if (pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && pm->cmd.buttons & BUTTON_ATTACK)
 		{
-			if (weaponData[pm->ps->weapon].firingType == FT_SEMI)
+			if (pm->ps->shotsRemaining & SHOTS_TOGGLEBIT)
 			{
-				return;
-			}
-			else if (weaponData[pm->ps->weapon].firingType == FT_BURST)
-			{
-				pm->ps->shotsRemaining = weaponData[pm->ps->weapon].shotsPerBurst & ~SHOTS_TOGGLEBIT;
+				if (weaponData[pm->ps->weapon].firingType == FT_SEMI)
+				{
+					return;
+				}
+				else if (weaponData[pm->ps->weapon].firingType == FT_BURST)
+				{
+					pm->ps->shotsRemaining = weaponData[pm->ps->weapon].shotsPerBurst & ~SHOTS_TOGGLEBIT;
+				}
 			}
 		}
 	}
@@ -14043,29 +14049,32 @@ static void PM_Weapon( void )
 		}
 	}
 
-	if (pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && pm->cmd.buttons & BUTTON_ATTACK)
+	if (cg_firingOption.integer == 1)
 	{
-		switch (weaponData[pm->ps->weapon].firingType)
+		if (pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && pm->cmd.buttons & BUTTON_ATTACK)
 		{
-			case FT_AUTOMATIC:
-				addTime = weaponData[pm->ps->weapon].fireTime;
-				break;
-			case FT_SEMI:
-				addTime = weaponData[pm->ps->weapon].fireTime;
-				pm->ps->shotsRemaining = SHOTS_TOGGLEBIT;
-				break;
-			case FT_BURST:
-				if ((pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT) == 1)
-				{	
+			switch (weaponData[pm->ps->weapon].firingType)
+			{
+				case FT_AUTOMATIC:
+					addTime = weaponData[pm->ps->weapon].fireTime;
+					break;
+				case FT_SEMI:
 					addTime = weaponData[pm->ps->weapon].fireTime;
 					pm->ps->shotsRemaining = SHOTS_TOGGLEBIT;
-				}
-				else
-				{
-					addTime = weaponData[pm->ps->weapon].burstFireDelay;
-					pm->ps->shotsRemaining = (pm->ps->shotsRemaining - 1) & ~SHOTS_TOGGLEBIT;
-				}
-				break;
+					break;
+				case FT_BURST:
+					if ((pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT) == 1)
+					{	
+						addTime = weaponData[pm->ps->weapon].fireTime;
+						pm->ps->shotsRemaining = SHOTS_TOGGLEBIT;
+					}
+					else
+					{
+						addTime = weaponData[pm->ps->weapon].burstFireDelay;
+						pm->ps->shotsRemaining = (pm->ps->shotsRemaining - 1) & ~SHOTS_TOGGLEBIT;
+					}
+					break;
+			}
 		}
 	}
 
@@ -14473,13 +14482,16 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
 	}
 
-	if (pm->gent 
-		&& (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent))
-		&& pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT 
-		&& pm->ps->eFlags & EF_FIRING 
-		&& weaponData[pm->ps->weapon].firingType == FT_BURST)
+	if (cg_firingOption.integer == 1)
 	{
-		pm->cmd.buttons |= BUTTON_ATTACK;
+		if (pm->gent 
+			&& (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent))
+			&& pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT 
+			&& pm->ps->eFlags & EF_FIRING 
+			&& weaponData[pm->ps->weapon].firingType == FT_BURST)
+		{
+			pm->cmd.buttons |= BUTTON_ATTACK;
+		}
 	}
 
 	primFireDown = (qboolean)(pm->cmd.buttons & BUTTON_ATTACK);
@@ -14634,20 +14646,23 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		pm->cmd.buttons &= ~(BUTTON_ALT_ATTACK|BUTTON_ATTACK);
 	}
 
-	if ( !(pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT) 
-		&& (primFireDown && !(pm->ps->eFlags & EF_FIRING)) )
+	if (cg_firingOption.integer == 1)
 	{
-		if (pm->ps->weaponTime <= 0)
+		if ( !(pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT) 
+			&& (primFireDown && !(pm->ps->eFlags & EF_FIRING)) )
 		{
-			if (weaponData[pm->ps->weapon].firingType == FT_BURST)
+			if (pm->ps->weaponTime <= 0)
 			{
-				pm->ps->shotsRemaining = weaponData[pm->ps->weapon].shotsPerBurst & ~SHOTS_TOGGLEBIT;
+				if (weaponData[pm->ps->weapon].firingType == FT_BURST)
+				{
+					pm->ps->shotsRemaining = weaponData[pm->ps->weapon].shotsPerBurst & ~SHOTS_TOGGLEBIT;
+				}
 			}
-		}
-		else
-		{
-			pm->cmd.buttons &= ~BUTTON_ATTACK;
-			primFireDown =  qfalse;
+			else
+			{
+				pm->cmd.buttons &= ~BUTTON_ATTACK;
+				primFireDown =  qfalse;
+			}
 		}
 	}
 
@@ -14687,9 +14702,12 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		pm->ps->eFlags &= ~EF_FIRING;
 		pm->ps->eFlags &= ~EF_ALT_FIRING;
 
-		if (weaponData[pm->ps->weapon].firingType == FT_SEMI && pm->ps->shotsRemaining & SHOTS_TOGGLEBIT)
+		if (cg_firingOption.integer == 1)
 		{
-			pm->ps->shotsRemaining = 0;
+			if (weaponData[pm->ps->weapon].firingType == FT_SEMI && pm->ps->shotsRemaining & SHOTS_TOGGLEBIT)
+			{
+				pm->ps->shotsRemaining = 0;
+			}
 		}
 
 		// if I don't check the flags before stopping FX then it switches them off too often, which tones down

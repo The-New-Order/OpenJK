@@ -52,6 +52,8 @@ extern int g_rocketLockEntNum;
 extern int g_rocketLockTime;
 extern int g_rocketSlackTime;
 
+extern vmCvar_t cg_firingOption;
+
 vec3_t	vfwd;
 vec3_t	vright;
 vec3_t	vup;
@@ -372,7 +374,14 @@ static void CG_DrawAmmo(const centity_t	*cent,const int xPos,const int yPos)
 			}
 			else
 			{
-				memcpy(calcColor, otherHUDBits[OHB_AMMOAMOUNT].color, sizeof(vec4_t));
+				if (cg_firingOption.integer == 1)
+				{
+					memcpy(calcColor, colorTable[CT_RED], sizeof(vec4_t));
+				}
+				else
+				{
+					memcpy(calcColor, otherHUDBits[OHB_AMMOAMOUNT].color, sizeof(vec4_t));
+				}
 			}
 		}
 		else

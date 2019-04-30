@@ -28,6 +28,8 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 #include "wp_saber.h"
 #include "g_functions.h"
 
+extern vmCvar_t cg_firingOption;
+
 extern void G_NextTestAxes( void );
 extern void G_ChangePlayerModel( gentity_t *ent, const char *newModel );
 extern void G_InitPlayerFromCvars( gentity_t *ent );
@@ -369,10 +371,20 @@ void Svcmd_SaberAttackCycle_f( void )
 	}
 
 	gentity_t *self = G_GetSelfForPlayerCmd();
-	if ( self->s.weapon != WP_SABER )
-	{// saberAttackCycle button also switches to saber
-		gi.SendConsoleCommand("weapon 1" );
-		return;
+	// if ( self->s.weapon != WP_SABER )
+	// {// saberAttackCycle button also switches to saber
+	// 	gi.SendConsoleCommand("weapon 1" );
+	// 	return;
+	// }
+
+	if (weaponData[self->s.weapon].firingType >= FT_AUTOMATIC)
+	{
+		gi.SendConsoleCommand("cg_firingOption !");
+		G_Sound( self, G_SoundIndex( "sound/vehicles/common/linkweaps.wav" ));
+	}
+	else if (weaponData[self->s.weapon].firingType < FT_AUTOMATIC)
+	{
+		gi.SendConsoleCommand("cg_firingOption 0");
 	}
 
 	if ( self->client->ps.dualSabers )
