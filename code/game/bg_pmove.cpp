@@ -146,7 +146,6 @@ extern cvar_t	*g_debugMelee;
 extern cvar_t	*g_saberNewControlScheme;
 extern cvar_t	*g_stepSlideFix;
 extern cvar_t	*g_saberAutoBlocking;
-extern vmCvar_t cg_firingOption;
 extern int defaultAltDamageCopy[WP_NUM_WEAPONS];
 
 static void PM_SetWaterLevelAtPoint( vec3_t org, int *waterlevel, int *watertype );
@@ -8928,7 +8927,23 @@ static void PM_BeginWeaponChange( int weapon ) {
 			cg.zoomMode = 0;
 		} 
 
-		gi.SendConsoleCommand("cg_firingOption 0");
+		if (weaponData[weapon].firingType >= FT_AUTOMATIC)
+		{
+			if (pm->ps->checkWeaponChange == qtrue)
+			{
+				pm->ps->firingMode = 1;
+				pm->ps->checkWeaponChange = qfalse;
+			}
+		}
+		else
+		{
+			if (pm->ps->firingMode == 1)
+			{
+				pm->ps->checkWeaponChange = qtrue;
+			}
+
+			pm->ps->firingMode = 0;
+		}
 	}
 
 	if ( pm->gent
@@ -13456,9 +13471,13 @@ static void PM_Weapon( void )
 
 	// check for weapon change
 	// can't change if weapon is firing, but can change again if lowering or raising
-	if ( (pm->ps->weaponTime <= 0 || pm->ps->weaponstate != WEAPON_FIRING)  && pm->ps->weaponstate != WEAPON_CHARGING_ALT && pm->ps->weaponstate != WEAPON_CHARGING) {
-		if ( pm->ps->weapon != pm->cmd.weapon && (!pm->ps->viewEntity || pm->ps->viewEntity >= ENTITYNUM_WORLD) && !PM_DoChargedWeapons()) {
-			PM_BeginWeaponChange( pm->cmd.weapon );
+	if (((pm->ps->shotsRemaining + 1) & ~SHOTS_TOGGLEBIT) == 1)
+	{
+		if ( (pm->ps->weaponTime <= 0 || pm->ps->weaponstate != WEAPON_FIRING)  && pm->ps->weaponstate != WEAPON_CHARGING_ALT && pm->ps->weaponstate != WEAPON_CHARGING) {
+			if ( pm->ps->weapon != pm->cmd.weapon && (!pm->ps->viewEntity || pm->ps->viewEntity >= ENTITYNUM_WORLD) && !PM_DoChargedWeapons()) {
+				PM_BeginWeaponChange( pm->cmd.weapon );
+				pm->ps->shotsRemaining = SHOTS_TOGGLEBIT;
+			}
 		}
 	}
 
@@ -13935,11 +13954,11 @@ static void PM_Weapon( void )
 
 	if ( pm->cmd.buttons & BUTTON_ALT_ATTACK )
 	{
-		if (cg_firingOption.integer == 1 && weaponData[pm->ps->weapon].firingType == FT_BURST)
+		if (pm->ps->firingMode == 1 && weaponData[pm->ps->weapon].firingType == FT_BURST)
 		{
 			amount = FT_BURST_ENERGY_SHOT;
 		}
-		else if (cg_firingOption.integer == 1 && weaponData[pm->ps->weapon].firingType == FT_HIGH_POWERED)
+		else if (pm->ps->firingMode == 1 && weaponData[pm->ps->weapon].firingType == FT_HIGH_POWERED)
 		{
 			amount = FT_HIGH_POWERED_ENERGY_SHOT;
 		}
@@ -13950,7 +13969,7 @@ static void PM_Weapon( void )
 	}
 	else
 	{
-		if (cg_firingOption.integer == 1 && weaponData[pm->ps->weapon].firingType == FT_BURST)
+		if (pm->ps->firingMode == 1 && weaponData[pm->ps->weapon].firingType == FT_BURST)
 		{
 			amount = FT_BURST_ENERGY_SHOT;
 		}
@@ -13968,7 +13987,7 @@ static void PM_Weapon( void )
 
 	pm->ps->weaponstate = WEAPON_FIRING;
 
-	if (cg_firingOption.integer == 1)
+	if (pm->ps->firingMode == 1 || (!(((pm->ps->shotsRemaining + 1) & ~SHOTS_TOGGLEBIT) == 1)))
 	{
 		if (pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && pm->cmd.buttons & BUTTON_ATTACK)
 		{
@@ -14095,7 +14114,7 @@ static void PM_Weapon( void )
 		}
 	}
 
-	if (cg_firingOption.integer == 1)
+	if (pm->ps->firingMode == 1 || (!(((pm->ps->shotsRemaining + 1) & ~SHOTS_TOGGLEBIT) == 1)))
 	{
 		if (pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && pm->cmd.buttons & BUTTON_ATTACK)
 		{
@@ -14541,7 +14560,7 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
 	}
 
-	if (cg_firingOption.integer == 1)
+	if (pm->ps->firingMode == 1 || (!(((pm->ps->shotsRemaining + 1) & ~SHOTS_TOGGLEBIT) == 1)))
 	{
 		if (pm->gent 
 			&& (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent))
@@ -14705,7 +14724,7 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		pm->cmd.buttons &= ~(BUTTON_ALT_ATTACK|BUTTON_ATTACK);
 	}
 
-	if (cg_firingOption.integer == 1)
+	if (pm->ps->firingMode == 1 || (!(((pm->ps->shotsRemaining + 1) & ~SHOTS_TOGGLEBIT) == 1)))
 	{
 		if ( !(pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT) 
 			&& (primFireDown && !(pm->ps->eFlags & EF_FIRING)) )
@@ -14727,7 +14746,7 @@ void PM_AdjustAttackStates( pmove_t *pm )
 
 	if (weaponData[pm->ps->weapon].firingType < FT_AUTOMATIC)
 	{
-		pm->ps->shotsRemaining = 0;
+		pm->ps->shotsRemaining = SHOTS_TOGGLEBIT;
 	}
 
 	// set the firing flag for continuous beam weapons, phaser will fire even if out of ammo
@@ -14761,12 +14780,9 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		pm->ps->eFlags &= ~EF_FIRING;
 		pm->ps->eFlags &= ~EF_ALT_FIRING;
 
-		if (cg_firingOption.integer == 1)
+		if (pm->ps->shotsRemaining & SHOTS_TOGGLEBIT)
 		{
-			if (weaponData[pm->ps->weapon].firingType == FT_SEMI && pm->ps->shotsRemaining & SHOTS_TOGGLEBIT)
-			{
-				pm->ps->shotsRemaining = 0;
-			}
+			pm->ps->shotsRemaining = 0;
 		}
 
 		// if I don't check the flags before stopping FX then it switches them off too often, which tones down
@@ -14796,31 +14812,40 @@ void PM_AdjustAttackStates( pmove_t *pm )
 			pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
 		}
 	}
-	if ( pm->ps->weapon != WP_DISRUPTOR && pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && weaponData[pm->ps->weapon].scopeType >= SCOPE_A280 )
+	
+	if ( pm->ps->weapon != WP_DISRUPTOR && pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) )
 	{
-		if ( pm->cmd.buttons & BUTTON_ATTACK && cg.zoomMode >= SCOPE_A280 )
+		if (weaponData[pm->ps->weapon].scopeType >= SCOPE_A280)
 		{
-			pm->cmd.buttons |= BUTTON_ALT_ATTACK;
-			pm->ps->eFlags |= EF_ALT_FIRING;
-		}
-		else
-		{
-			pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
-		}
-
-		if (cg_firingOption.integer == 1)
-		{
-			if ( pm->cmd.buttons & BUTTON_ATTACK && cg.zoomMode < SCOPE_A280 && weaponData[pm->ps->weapon].firingType == FT_HIGH_POWERED )
-			{
-				pm->cmd.buttons &= ~BUTTON_ATTACK;
-			}
-		}
-		else
-		{
-			if ( pm->cmd.buttons & BUTTON_ATTACK )
+			if ( pm->cmd.buttons & BUTTON_ATTACK && cg.zoomMode >= SCOPE_A280 )
 			{
 				pm->cmd.buttons |= BUTTON_ATTACK;
+				pm->ps->eFlags |= EF_FIRING;
 			}
+			else
+			{
+				pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
+			}
+
+			// if (cg_firingOption.integer == 1 || (!(((pm->ps->shotsRemaining + 1) & ~SHOTS_TOGGLEBIT) == 1)))
+			// if (cg_firingOption.integer == 1)
+			// {
+			// 	if ( pm->cmd.buttons & BUTTON_ATTACK && cg.zoomMode < SCOPE_A280 && weaponData[pm->ps->weapon].firingType == FT_HIGH_POWERED )
+			// 	{
+			// 		pm->cmd.buttons &= ~BUTTON_ATTACK;
+			// 	}
+			// }
+			// else
+			// {
+			// 	if ( pm->cmd.buttons & BUTTON_ATTACK )
+			// 	{
+			// 		pm->cmd.buttons |= BUTTON_ATTACK;
+			// 	}
+			// }
+		}
+		else if (weaponData[pm->ps->weapon].firingType >= FT_AUTOMATIC && weaponData[pm->ps->weapon].scopeType < SCOPE_A280)
+		{
+			pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
 		}
 	}
 }

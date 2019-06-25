@@ -270,14 +270,6 @@ void WP_FireEE3CarbineRifle(gentity_t *ent, qboolean alt_fire)
 	if (ent->client && ent->client->NPC_class == CLASS_VEHICLE)
 	{//no inherent aim screw up
 	}
-	else if ( alt_fire && cg.zoomMode >= SCOPE_A280 )
-	{
-		AngleVectors( ent->client->renderInfo.eyeAngles, forwardVec, NULL, NULL );
-		vectoangles( forwardVec, angles );
-
-		angles[PITCH] += Q_flrand(-1.0f, 1.0f) * SCOPE_SPREAD;
-		angles[YAW]   += Q_flrand(-1.0f, 1.0f) * SCOPE_SPREAD;
-	}
 	else if (!(ent->client->ps.forcePowersActive&(1 << FP_SEE))
 		|| ent->client->ps.forcePowerLevel[FP_SEE] < FORCE_LEVEL_2)
 	{//force sight 2+ gives perfect aim
@@ -301,14 +293,25 @@ void WP_FireEE3CarbineRifle(gentity_t *ent, qboolean alt_fire)
 			}
 			else
 			{
-				// add some slop to the main-fire direction
-				angs[PITCH] += Q_flrand(-1.0f, 1.0f) * BLASTER_MAIN_SPREAD;
-				angs[YAW] += Q_flrand(-1.0f, 1.0f) * BLASTER_MAIN_SPREAD;
+				if (cg.zoomMode >= SCOPE_A280)
+				{
+					AngleVectors( ent->client->renderInfo.eyeAngles, forwardVec, NULL, NULL );
+					vectoangles( forwardVec, angles );
+
+					angles[PITCH] += Q_flrand(-1.0f, 1.0f) * SCOPE_SPREAD;
+					angles[YAW]   += Q_flrand(-1.0f, 1.0f) * SCOPE_SPREAD;
+				}
+				else
+				{
+					// add some slop to the main-fire direction
+					angs[PITCH] += Q_flrand(-1.0f, 1.0f) * BLASTER_MAIN_SPREAD;
+					angs[YAW]	+= Q_flrand(-1.0f, 1.0f) * BLASTER_MAIN_SPREAD;
+				}
 			}
 		}
 	}
 
-	if ( alt_fire && cg.zoomMode >= SCOPE_A280 )
+	if (cg.zoomMode >= SCOPE_A280)
 	{
 		AngleVectors( angles, forwardVec, NULL, NULL );
 		WP_FireBlasterMissile( ent, ent->client->renderInfo.eyePoint, forwardVec, alt_fire );

@@ -340,7 +340,6 @@ vmCvar_t	cg_fovViewmodel;
 vmCvar_t	cg_fovViewmodelAdjust;
 
 vmCvar_t	cg_scaleVehicleSensitivity;
-vmCvar_t	cg_firingOption;
 
 typedef struct {
 	vmCvar_t	*vmCvar;
@@ -460,7 +459,6 @@ static cvarTable_t cvarTable[] = {
 	{ &cg_fovViewmodelAdjust, "cg_fovViewmodelAdjust", "1", CVAR_ARCHIVE },
 
 	{ &cg_scaleVehicleSensitivity, "cg_scaleVehicleSensitivity", "1", CVAR_ARCHIVE },
-	{ &cg_firingOption,	"cg_firingOption",	"0", CVAR_ARCHIVE },
 };
 
 static const size_t cvarTableSize = ARRAY_LEN( cvarTable );
