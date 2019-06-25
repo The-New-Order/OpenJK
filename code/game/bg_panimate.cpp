@@ -5990,6 +5990,7 @@ void PM_TorsoAnimation( void )
 					break;
 
 				case WP_BLASTER:
+				case WP_EE3_CARBINE_RIFLE:
 					PM_SetAnim(pm,SETANIM_TORSO,TORSO_WEAPONREADY3,SETANIM_FLAG_NORMAL);
 					//PM_SetAnim(pm,SETANIM_LEGS,BOTH_ATTACK2,SETANIM_FLAG_NORMAL);
 					break;
@@ -6172,6 +6173,7 @@ void PM_TorsoAnimation( void )
 				&& pm->ps->weapon != WP_FLECHETTE
 				&& pm->ps->weapon != WP_ROCKET_LAUNCHER
 				&& pm->ps->weapon != WP_CONCUSSION
+				&& pm->ps->weapon != WP_EE3_CARBINE_RIFLE
 				&& ( PM_RunningAnim( pm->ps->legsAnim )
 					|| (PM_WalkingAnim( pm->ps->legsAnim ) && (pm->ps->clientNum < MAX_CLIENTS||PM_ControlledByPlayer()))
 					|| PM_JumpingAnim( pm->ps->legsAnim )
@@ -6300,6 +6302,7 @@ void PM_TorsoAnimation( void )
 					break;
 
 				case WP_BLASTER:
+				case WP_EE3_CARBINE_RIFLE:
 					if ( weaponBusy )
 					{
 						PM_SetAnim(pm,SETANIM_TORSO,TORSO_WEAPONREADY3,SETANIM_FLAG_NORMAL);

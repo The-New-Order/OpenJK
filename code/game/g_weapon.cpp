@@ -76,6 +76,7 @@ float weaponSpeed[WP_NUM_WEAPONS][2] =
 	{ 0,0 },//WP_TUSKEN_STAFF,
 	{ 0,0 },//WP_SCEPTER,
 	{ 0,0 },//WP_NOGHRI_STICK,
+	{ BLASTER_VELOCITY, BLASTER_VELOCITY }, // WP_EE3_CARBINE_RIFLE,
 
 };
 
@@ -384,6 +385,7 @@ qboolean W_AccuracyLoggableWeapon( int weapon, qboolean alt_fire, int mod )
 		case WP_BRYAR_PISTOL:
 		case WP_BLASTER_PISTOL:
 		case WP_BLASTER:
+		case WP_EE3_CARBINE_RIFLE:
 		case WP_DISRUPTOR:
 		case WP_BOWCASTER:
 		case WP_ROCKET_LAUNCHER:
@@ -498,6 +500,18 @@ void CalcMuzzlePoint( gentity_t *const ent, vec3_t forwardVec, vec3_t right, vec
 		VectorMA( muzzlePoint, 1, vrightVec, muzzlePoint );
 		break;
 
+	case WP_EE3_CARBINE_RIFLE:
+		ViewHeightFix(ent);
+		muzzlePoint[2] += ent->client->ps.viewheight;//By eyes
+		muzzlePoint[2] -= 1;
+		if (ent->s.number == 0)
+			VectorMA(muzzlePoint, 12, forwardVec, muzzlePoint); // player, don't set this any lower otherwise the projectile will impact immediately when your back is to a wall
+		else
+			VectorMA(muzzlePoint, 2, forwardVec, muzzlePoint); // NPC, don't set too far forwardVec otherwise the projectile can go through doors
+
+		VectorMA(muzzlePoint, 1, vrightVec, muzzlePoint);
+		break;
+
 	case WP_SABER:
 		if(ent->NPC!=NULL &&
 			(ent->client->ps.torsoAnim == TORSO_WEAPONREADY2 ||
@@ -568,6 +582,7 @@ vec3_t WP_MuzzlePoint[WP_NUM_WEAPONS] =
 	{0,		0,		0	},	// WP_ATST_SIDE,
 	{0	,	8,		0	},	// WP_STUN_BATON,
 	{12,	6,		-6	},	// WP_BRYAR_PISTOL,
+	{12,	6,		-6  },  // WP_EE3_CARBINE_RIFLE,
 };
 
 void WP_RocketLock( gentity_t *ent, float lockDist )
@@ -1539,6 +1554,10 @@ void FireWeapon( gentity_t *ent, qboolean alt_fire )
 		}
 		break;
 			
+	case WP_EE3_CARBINE_RIFLE:
+		WP_FireEE3CarbineRifle(ent, alt_fire);
+		break;
+
 	case WP_TUSKEN_STAFF:
 	default:
 		return;
