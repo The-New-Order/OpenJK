@@ -230,7 +230,7 @@ typedef struct
 	void	(*func)(const char **holdBuf);
 } wpnParms_t;
 
-int defaultAltDamageCopy[WP_NUM_WEAPONS];
+int defaultDamageCopy[WP_NUM_WEAPONS];
 
 // This is used as a fallback for each new field, in case they're using base files --eez
 const int defaultDamage[] = {
@@ -1633,7 +1633,7 @@ void WP_LoadWeaponParms (void)
 		weaponData[i].altSplashDamage = defaultAltSplashDamage[i];
 		weaponData[i].splashRadius = defaultSplashRadius[i];
 		weaponData[i].altSplashRadius = defaultAltSplashRadius[i];
-		defaultAltDamageCopy[i] = defaultAltDamage[i];
+		defaultDamageCopy[i] = defaultAltDamage[i];
 	}
 
 	WP_ParseParms(buffer);

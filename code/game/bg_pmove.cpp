@@ -146,7 +146,7 @@ extern cvar_t	*g_debugMelee;
 extern cvar_t	*g_saberNewControlScheme;
 extern cvar_t	*g_stepSlideFix;
 extern cvar_t	*g_saberAutoBlocking;
-extern int defaultAltDamageCopy[WP_NUM_WEAPONS];
+extern int defaultDamageCopy[WP_NUM_WEAPONS];
 
 static void PM_SetWaterLevelAtPoint( vec3_t org, int *waterlevel, int *watertype );
 
@@ -13954,20 +13954,17 @@ static void PM_Weapon( void )
 
 	if ( pm->cmd.buttons & BUTTON_ALT_ATTACK )
 	{
-		if (pm->ps->firingMode == 1 && weaponData[pm->ps->weapon].firingType == FT_HIGH_POWERED)
-		{
-			amount = FT_HIGH_POWERED_ENERGY_SHOT;
-		}
-		else
-		{
-			amount = weaponData[pm->ps->weapon].altEnergyPerShot;
-		}
+		amount = weaponData[pm->ps->weapon].altEnergyPerShot;
 	}
 	else
 	{
 		if (pm->ps->firingMode == 1 && weaponData[pm->ps->weapon].firingType == FT_BURST)
 		{
 			amount = FT_BURST_ENERGY_SHOT;
+		}
+		else if (pm->ps->firingMode == 1 && weaponData[pm->ps->weapon].firingType == FT_HIGH_POWERED)
+		{
+			amount = FT_HIGH_POWERED_ENERGY_SHOT;
 		}
 		else
 		{
@@ -14138,7 +14135,7 @@ static void PM_Weapon( void )
 				case FT_HIGH_POWERED:
 					for (int i = 0; i < WP_NUM_WEAPONS; i++)
 					{
-						weaponData[i].altDamage = FT_HIGH_POWERED_DAMAGE;
+						weaponData[i].damage = FT_HIGH_POWERED_DAMAGE;
 					}
 					break;
 			}
@@ -14148,7 +14145,7 @@ static void PM_Weapon( void )
 	{
 		for (int i = 0; i < WP_NUM_WEAPONS; i++)
 		{
-			weaponData[i].altDamage = defaultAltDamageCopy[i];
+			weaponData[i].damage = defaultDamageCopy[i];
 		}
 	}
 
@@ -14809,40 +14806,25 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		}
 	}
 	
-	if ( pm->ps->weapon != WP_DISRUPTOR && pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) )
+	if ( pm->ps->weapon != WP_DISRUPTOR && pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && weaponData[pm->ps->weapon].scopeType >= SCOPE_A280 )
 	{
-		if (weaponData[pm->ps->weapon].scopeType >= SCOPE_A280)
+		if ( pm->cmd.buttons & BUTTON_ATTACK && cg.zoomMode < SCOPE_A280 && pm->ps->firingMode == 1 && weaponData[pm->ps->weapon].firingType == FT_HIGH_POWERED )
 		{
-			if ( pm->cmd.buttons & BUTTON_ATTACK && cg.zoomMode >= SCOPE_A280 )
-			{
-				pm->cmd.buttons |= BUTTON_ATTACK;
-				pm->ps->eFlags |= EF_FIRING;
-			}
-			else
-			{
-				pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
-			}
-
-			// if (cg_firingOption.integer == 1 || (!(((pm->ps->shotsRemaining + 1) & ~SHOTS_TOGGLEBIT) == 1)))
-			// if (cg_firingOption.integer == 1)
-			// {
-			// 	if ( pm->cmd.buttons & BUTTON_ATTACK && cg.zoomMode < SCOPE_A280 && weaponData[pm->ps->weapon].firingType == FT_HIGH_POWERED )
-			// 	{
-			// 		pm->cmd.buttons &= ~BUTTON_ATTACK;
-			// 	}
-			// }
-			// else
-			// {
-			// 	if ( pm->cmd.buttons & BUTTON_ATTACK )
-			// 	{
-			// 		pm->cmd.buttons |= BUTTON_ATTACK;
-			// 	}
-			// }
+			pm->cmd.buttons &= ~BUTTON_ATTACK;
 		}
-		else if (weaponData[pm->ps->weapon].firingType >= FT_AUTOMATIC && weaponData[pm->ps->weapon].scopeType < SCOPE_A280)
+		else if ( pm->cmd.buttons & BUTTON_ATTACK && cg.zoomMode >= SCOPE_A280 )
+		{
+			pm->cmd.buttons |= BUTTON_ATTACK;
+			pm->ps->eFlags |= EF_FIRING;
+		}
+		else
 		{
 			pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
 		}
+	}
+	else if (weaponData[pm->ps->weapon].firingType >= FT_AUTOMATIC && weaponData[pm->ps->weapon].scopeType < SCOPE_A280)
+	{
+		pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
 	}
 }
 
