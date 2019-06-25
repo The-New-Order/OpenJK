@@ -14805,7 +14805,7 @@ void PM_AdjustAttackStates( pmove_t *pm )
 			pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
 		}
 	}
-	
+
 	if ( pm->ps->weapon != WP_DISRUPTOR && pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && weaponData[pm->ps->weapon].scopeType >= SCOPE_A280 )
 	{
 		if ( pm->cmd.buttons & BUTTON_ATTACK && cg.zoomMode < SCOPE_A280 && pm->ps->firingMode == 1 && weaponData[pm->ps->weapon].firingType == FT_HIGH_POWERED )
