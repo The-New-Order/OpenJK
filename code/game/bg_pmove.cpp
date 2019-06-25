@@ -13954,11 +13954,7 @@ static void PM_Weapon( void )
 
 	if ( pm->cmd.buttons & BUTTON_ALT_ATTACK )
 	{
-		if (pm->ps->firingMode == 1 && weaponData[pm->ps->weapon].firingType == FT_BURST)
-		{
-			amount = FT_BURST_ENERGY_SHOT;
-		}
-		else if (pm->ps->firingMode == 1 && weaponData[pm->ps->weapon].firingType == FT_HIGH_POWERED)
+		if (pm->ps->firingMode == 1 && weaponData[pm->ps->weapon].firingType == FT_HIGH_POWERED)
 		{
 			amount = FT_HIGH_POWERED_ENERGY_SHOT;
 		}
