@@ -13930,7 +13930,14 @@ static void PM_Weapon( void )
 	}
 	else
 	{
-		amount = weaponData[pm->ps->weapon].energyPerShot;
+		if (pm->ps->firingMode == 1 && weaponData[pm->ps->weapon].firingType == FT_BURST)
+		{
+			amount = FT_BURST_ENERGY_SHOT;
+		}
+		else
+		{
+			amount = weaponData[pm->ps->weapon].energyPerShot;
+		}
 	}
 
 	if ( (pm->ps->weaponstate == WEAPON_CHARGING) || (pm->ps->weaponstate == WEAPON_CHARGING_ALT) )
