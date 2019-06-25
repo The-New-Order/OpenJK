@@ -8925,6 +8925,24 @@ static void PM_BeginWeaponChange( int weapon ) {
 		{
 			cg.zoomMode = 0;
 		} 
+
+		if (weaponData[weapon].firingType >= FT_AUTOMATIC)
+		{
+			if (pm->ps->checkWeaponChange == qtrue)
+			{
+				pm->ps->firingMode = 1;
+				pm->ps->checkWeaponChange = qfalse;
+			}
+		}
+		else
+		{
+			if (pm->ps->firingMode == 1)
+			{
+				pm->ps->checkWeaponChange = qtrue;
+			}
+
+			pm->ps->firingMode = 0;
+		}
 	}
 
 	if ( pm->gent
@@ -13437,9 +13455,13 @@ static void PM_Weapon( void )
 
 	// check for weapon change
 	// can't change if weapon is firing, but can change again if lowering or raising
-	if ( (pm->ps->weaponTime <= 0 || pm->ps->weaponstate != WEAPON_FIRING)  && pm->ps->weaponstate != WEAPON_CHARGING_ALT && pm->ps->weaponstate != WEAPON_CHARGING) {
-		if ( pm->ps->weapon != pm->cmd.weapon && (!pm->ps->viewEntity || pm->ps->viewEntity >= ENTITYNUM_WORLD) && !PM_DoChargedWeapons()) {
-			PM_BeginWeaponChange( pm->cmd.weapon );
+	if (((pm->ps->shotsRemaining + 1) & ~SHOTS_TOGGLEBIT) == 1)
+	{
+		if ( (pm->ps->weaponTime <= 0 || pm->ps->weaponstate != WEAPON_FIRING)  && pm->ps->weaponstate != WEAPON_CHARGING_ALT && pm->ps->weaponstate != WEAPON_CHARGING) {
+			if ( pm->ps->weapon != pm->cmd.weapon && (!pm->ps->viewEntity || pm->ps->viewEntity >= ENTITYNUM_WORLD) && !PM_DoChargedWeapons()) {
+				PM_BeginWeaponChange( pm->cmd.weapon );
+				pm->ps->shotsRemaining = SHOTS_TOGGLEBIT;
+			}
 		}
 	}
 
@@ -13919,17 +13941,20 @@ static void PM_Weapon( void )
 
 	pm->ps->weaponstate = WEAPON_FIRING;
 
-	if (pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && pm->cmd.buttons & BUTTON_ATTACK)
+	if (pm->ps->firingMode == 1 || (!(((pm->ps->shotsRemaining + 1) & ~SHOTS_TOGGLEBIT) == 1)))
 	{
-		if (pm->ps->shotsRemaining & SHOTS_TOGGLEBIT)
+		if (pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && pm->cmd.buttons & BUTTON_ATTACK)
 		{
-			if (weaponData[pm->ps->weapon].firingType == FT_SEMI)
+			if (pm->ps->shotsRemaining & SHOTS_TOGGLEBIT)
 			{
-				return;
-			}
-			else if (weaponData[pm->ps->weapon].firingType == FT_BURST)
-			{
-				pm->ps->shotsRemaining = weaponData[pm->ps->weapon].shotsPerBurst & ~SHOTS_TOGGLEBIT;
+				if (weaponData[pm->ps->weapon].firingType == FT_SEMI)
+				{
+					return;
+				}
+				else if (weaponData[pm->ps->weapon].firingType == FT_BURST)
+				{
+					pm->ps->shotsRemaining = weaponData[pm->ps->weapon].shotsPerBurst & ~SHOTS_TOGGLEBIT;
+				}
 			}
 		}
 	}
@@ -14043,29 +14068,32 @@ static void PM_Weapon( void )
 		}
 	}
 
-	if (pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && pm->cmd.buttons & BUTTON_ATTACK)
+	if (pm->ps->firingMode == 1 || (!(((pm->ps->shotsRemaining + 1) & ~SHOTS_TOGGLEBIT) == 1)))
 	{
-		switch (weaponData[pm->ps->weapon].firingType)
+		if (pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && pm->cmd.buttons & BUTTON_ATTACK)
 		{
-			case FT_AUTOMATIC:
-				addTime = weaponData[pm->ps->weapon].fireTime;
-				break;
-			case FT_SEMI:
-				addTime = weaponData[pm->ps->weapon].fireTime;
-				pm->ps->shotsRemaining = SHOTS_TOGGLEBIT;
-				break;
-			case FT_BURST:
-				if ((pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT) == 1)
-				{	
+			switch (weaponData[pm->ps->weapon].firingType)
+			{
+				case FT_AUTOMATIC:
+					addTime = weaponData[pm->ps->weapon].fireTime;
+					break;
+				case FT_SEMI:
 					addTime = weaponData[pm->ps->weapon].fireTime;
 					pm->ps->shotsRemaining = SHOTS_TOGGLEBIT;
-				}
-				else
-				{
-					addTime = weaponData[pm->ps->weapon].burstFireDelay;
-					pm->ps->shotsRemaining = (pm->ps->shotsRemaining - 1) & ~SHOTS_TOGGLEBIT;
-				}
-				break;
+					break;
+				case FT_BURST:
+					if ((pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT) == 1)
+					{	
+						addTime = weaponData[pm->ps->weapon].fireTime;
+						pm->ps->shotsRemaining = SHOTS_TOGGLEBIT;
+					}
+					else
+					{
+						addTime = weaponData[pm->ps->weapon].burstFireDelay;
+						pm->ps->shotsRemaining = (pm->ps->shotsRemaining - 1) & ~SHOTS_TOGGLEBIT;
+					}
+					break;
+			}
 		}
 	}
 
@@ -14473,13 +14501,16 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
 	}
 
-	if (pm->gent 
-		&& (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent))
-		&& pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT 
-		&& pm->ps->eFlags & EF_FIRING 
-		&& weaponData[pm->ps->weapon].firingType == FT_BURST)
+	if (pm->ps->firingMode == 1 || (!(((pm->ps->shotsRemaining + 1) & ~SHOTS_TOGGLEBIT) == 1)))
 	{
-		pm->cmd.buttons |= BUTTON_ATTACK;
+		if (pm->gent 
+			&& (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent))
+			&& pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT 
+			&& pm->ps->eFlags & EF_FIRING 
+			&& weaponData[pm->ps->weapon].firingType == FT_BURST)
+		{
+			pm->cmd.buttons |= BUTTON_ATTACK;
+		}
 	}
 
 	primFireDown = (qboolean)(pm->cmd.buttons & BUTTON_ATTACK);
@@ -14634,26 +14665,29 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		pm->cmd.buttons &= ~(BUTTON_ALT_ATTACK|BUTTON_ATTACK);
 	}
 
-	if ( !(pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT) 
-		&& (primFireDown && !(pm->ps->eFlags & EF_FIRING)) )
+	if (pm->ps->firingMode == 1 || (!(((pm->ps->shotsRemaining + 1) & ~SHOTS_TOGGLEBIT) == 1)))
 	{
-		if (pm->ps->weaponTime <= 0)
+		if ( !(pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT) 
+			&& (primFireDown && !(pm->ps->eFlags & EF_FIRING)) )
 		{
-			if (weaponData[pm->ps->weapon].firingType == FT_BURST)
+			if (pm->ps->weaponTime <= 0)
 			{
-				pm->ps->shotsRemaining = weaponData[pm->ps->weapon].shotsPerBurst & ~SHOTS_TOGGLEBIT;
+				if (weaponData[pm->ps->weapon].firingType == FT_BURST)
+				{
+					pm->ps->shotsRemaining = weaponData[pm->ps->weapon].shotsPerBurst & ~SHOTS_TOGGLEBIT;
+				}
 			}
-		}
-		else
-		{
-			pm->cmd.buttons &= ~BUTTON_ATTACK;
-			primFireDown =  qfalse;
+			else
+			{
+				pm->cmd.buttons &= ~BUTTON_ATTACK;
+				primFireDown =  qfalse;
+			}
 		}
 	}
 
 	if (weaponData[pm->ps->weapon].firingType < FT_AUTOMATIC)
 	{
-		pm->ps->shotsRemaining = 0;
+		pm->ps->shotsRemaining = SHOTS_TOGGLEBIT;
 	}
 
 	// set the firing flag for continuous beam weapons, phaser will fire even if out of ammo
@@ -14687,7 +14721,7 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		pm->ps->eFlags &= ~EF_FIRING;
 		pm->ps->eFlags &= ~EF_ALT_FIRING;
 
-		if (weaponData[pm->ps->weapon].firingType == FT_SEMI && pm->ps->shotsRemaining & SHOTS_TOGGLEBIT)
+		if (pm->ps->shotsRemaining & SHOTS_TOGGLEBIT)
 		{
 			pm->ps->shotsRemaining = 0;
 		}
@@ -14719,6 +14753,7 @@ void PM_AdjustAttackStates( pmove_t *pm )
 			pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
 		}
 	}
+
 	if ( pm->ps->weapon != WP_DISRUPTOR && pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)) && weaponData[pm->ps->weapon].scopeType >= SCOPE_A280 )
 	{
 		if ( pm->cmd.buttons & BUTTON_ATTACK && cg.zoomMode >= SCOPE_A280 )
