@@ -177,7 +177,8 @@ enum FiringType
 {
 	FT_AUTOMATIC = 1,
 	FT_SEMI,
-	FT_BURST
+	FT_BURST,
+	FT_HIGH_POWERED
 };
 
 
@@ -409,6 +410,8 @@ enum ScopeType
 //--------------
 #define BURST_ENERGY_SHOT				4
 #define BURST_ENERGY_SHOT_SCOPED		5
+#define HIGH_POWERED_ENERGY_SHOT		50
+#define HIGH_POWERED_DAMAGE				150
 
 // Scope Types
 //--------------

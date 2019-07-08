@@ -177,6 +177,8 @@ typedef struct
 	void	(*func)(const char **holdBuf);
 } wpnParms_t;
 
+int defaultDamageCopy[WP_NUM_WEAPONS];
+
 // This is used as a fallback for each new field, in case they're using base files --eez
 const int defaultDamage[] = {
 	0,							// WP_NONE
@@ -1457,7 +1459,7 @@ void WPN_FiringType(const char **holdBuf)
         return;
     }
 
-    if ((tokenInt < FT_AUTOMATIC) || (tokenInt > FT_BURST ))
+    if ((tokenInt < FT_AUTOMATIC) || (tokenInt > FT_HIGH_POWERED ))
     {
         gi.Printf(S_COLOR_YELLOW"WARNING: bad firingType in external weapon data '%d'\n", tokenInt);
         return;
@@ -1571,6 +1573,7 @@ void WP_LoadWeaponParms (void)
 		weaponData[i].altSplashDamage = defaultAltSplashDamage[i];
 		weaponData[i].splashRadius = defaultSplashRadius[i];
 		weaponData[i].altSplashRadius = defaultAltSplashRadius[i];
+		defaultDamageCopy[i] = defaultDamage[i];
 	}
 
 	WP_ParseParms(buffer);
