@@ -210,6 +210,10 @@ void G_Give( gentity_t *ent, const char *name, const char *args, int argc )
 		{
 			ent->client->ps.weapons[i] = 1;
 		}
+		for (int i = WP_EE3_CARBINE_RIFLE; i < WP_NUM_WEAPONS; i++)
+		{
+			ent->client->ps.weapons[i] = 1;
+		}
 		if ( !give_all )
 			return;
 	}
