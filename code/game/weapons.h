@@ -416,9 +416,5 @@ enum ScopeType
 #define HIGH_POWERED_ENERGY_SHOT		50
 #define HIGH_POWERED_DAMAGE				150
 
-// Scope Types
-//--------------
-#define SCOPE_SPREAD					0.01f
-
 
 #endif//#ifndef __WEAPONS_H__

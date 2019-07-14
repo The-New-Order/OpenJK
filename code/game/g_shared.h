@@ -790,6 +790,9 @@ public:
 	int			inSpaceSuffocation;
 	int			inSpaceIndex;
 
+	float		cooldownSpread;
+	float		walkingSpread;
+	float		accuracyReduceTime;
 
 	void sg_export(
 		ojk::SavedGameHelper& saved_game) const
@@ -855,6 +858,9 @@ public:
 		saved_game.write<float>(rocketTargetTime);
 		saved_game.write<int32_t>(inSpaceSuffocation);
 		saved_game.write<int32_t>(inSpaceIndex);
+		saved_game.write<float>(cooldownSpread);
+		saved_game.write<float>(walkingSpread);
+		saved_game.write<float>(accuracyReduceTime);
 	}
 
 	void sg_import(
@@ -921,6 +927,9 @@ public:
 		saved_game.read<float>(rocketTargetTime);
 		saved_game.read<int32_t>(inSpaceSuffocation);
 		saved_game.read<int32_t>(inSpaceIndex);
+		saved_game.read<float>(cooldownSpread);
+		saved_game.read<float>(walkingSpread);
+		saved_game.read<float>(accuracyReduceTime);
 	}
 }; // GClientBase
 

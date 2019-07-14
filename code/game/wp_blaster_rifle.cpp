@@ -27,6 +27,8 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 #include "w_local.h"
 #include "../cgame/cg_local.h"
 
+void WP_FiringSpread(gentity_t *ent, float &spread);
+
 
 //---------------
 //	Blaster
@@ -247,9 +249,13 @@ void WP_FireEE3CarbineRifleMissile(gentity_t *ent, vec3_t start, vec3_t dir, qbo
 void WP_FireEE3CarbineRifle(gentity_t *ent, qboolean alt_fire)
 //---------------------------------------------------------
 {
+	float firingSpread;
+
 	vec3_t	dir, angs, angles;
 
 	vectoangles(forwardVec, angs);
+
+	WP_FiringSpread(ent, firingSpread);
 
 	if (ent->client && ent->client->NPC_class == CLASS_VEHICLE)
 	{//no inherent aim screw up
@@ -259,8 +265,8 @@ void WP_FireEE3CarbineRifle(gentity_t *ent, qboolean alt_fire)
 		AngleVectors( ent->client->renderInfo.eyeAngles, forwardVec, NULL, NULL );
 		vectoangles( forwardVec, angles );
 
-		angles[PITCH] += Q_flrand(-1.0f, 1.0f) * SCOPE_SPREAD;
-		angles[YAW]   += Q_flrand(-1.0f, 1.0f) * SCOPE_SPREAD;
+		angles[PITCH] += Q_flrand(-1.0f, 1.0f) * firingSpread;
+		angles[YAW]   += Q_flrand(-1.0f, 1.0f) * firingSpread;
 	}
 	else if (!(ent->client->ps.forcePowersActive&(1 << FP_SEE))
 		|| ent->client->ps.forcePowerLevel[FP_SEE] < FORCE_LEVEL_2)
@@ -286,8 +292,8 @@ void WP_FireEE3CarbineRifle(gentity_t *ent, qboolean alt_fire)
 			else
 			{
 				// add some slop to the main-fire direction
-				angs[PITCH] += Q_flrand(-1.0f, 1.0f) * BLASTER_MAIN_SPREAD;
-				angs[YAW]	+= Q_flrand(-1.0f, 1.0f) * BLASTER_MAIN_SPREAD;
+				angs[PITCH] += Q_flrand(-1.0f, 1.0f) * firingSpread;
+				angs[YAW]	+= Q_flrand(-1.0f, 1.0f) * firingSpread;
 			}
 		}
 	}
@@ -304,4 +310,32 @@ void WP_FireEE3CarbineRifle(gentity_t *ent, qboolean alt_fire)
 		// FIXME: if temp_org does not have clear trace to inside the bbox, don't shoot!
 		WP_FireEE3CarbineRifleMissile( ent, muzzle, dir, alt_fire );
 	}
+}
+
+void WP_FiringSpread(gentity_t *ent, float &spread)
+{
+	if (cg.zoomMode >= ST_A280)
+	{
+		if (ent->client->cooldownSpread >= 1.5f)
+		{
+			ent->client->cooldownSpread = 1.5f;
+		}
+		else
+		{
+			ent->client->cooldownSpread += 0.15f;
+		}
+	}
+	else
+	{
+		if (ent->client->cooldownSpread >= 2.0f)
+		{
+			ent->client->cooldownSpread = 2.0f;
+		}
+		else
+		{
+			ent->client->cooldownSpread += 0.25f;
+		}
+	}
+
+	spread = ent->client->cooldownSpread + ent->client->walkingSpread;
 }

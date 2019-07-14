@@ -1731,6 +1731,22 @@ void ClientTimerActions( gentity_t *ent, int msec ) {
 			}
 		}
 	}
+
+	// Code from JKG
+	if (client->accuracyReduceTime <= level.time)
+	{
+		if (!(client->ps.eFlags & (EF_FIRING|EF_ALT_FIRING)))
+		{
+			client->cooldownSpread -= 0.05f;
+		}
+
+		if (client->cooldownSpread <= 0.0f)
+		{
+			client->cooldownSpread = 0.0f;
+		}
+		
+		client->accuracyReduceTime = level.time + 20;
+	}
 }
 
 /*
@@ -4891,6 +4907,22 @@ extern cvar_t	*g_skippingcin;
 				cg.zoomMode = 0;
 				cg.zoomTime = cg.time;
 				cg.zoomLocked = qfalse;
+			}
+		}
+
+		if (weaponData[ent->client->ps.weapon].firingType >= FT_AUTOMATIC)
+		{
+			if (cg.zoomMode >= ST_A280 && ((ucmd->forwardmove||ucmd->rightmove) || ucmd->upmove > 0))
+			{
+				ent->client->walkingSpread = 0.30f;
+			}
+			else if ((ucmd->forwardmove||ucmd->rightmove) || ucmd->upmove > 0)
+			{
+				ent->client->walkingSpread = 0.50f;
+			}
+			else
+			{
+				ent->client->walkingSpread = 0.0f;
 			}
 		}
 
