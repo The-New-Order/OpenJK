@@ -222,6 +222,8 @@ void WPN_BurstFireDelay(const char **holdBuf);
 
 void WPN_ScopeType(const char **holdBuf);
 
+void WPN_Recoil(const char **holdBuf);
+
 // Legacy weapons.dat force fields
 void WPN_FuncSkip(const char **holdBuf);
 
@@ -515,6 +517,8 @@ wpnParms_t WpnParms[] =
 	{ "burstFireDelay",		WPN_BurstFireDelay },
 
 	{ "scopeType",			WPN_ScopeType },
+
+	{ "recoil",				WPN_Recoil },
 
 	// Old legacy files contain these, so we skip them to shut up warnings
 	{ "firingforce",		WPN_FuncSkip },
@@ -1584,6 +1588,25 @@ void WPN_ScopeType(const char **holdBuf)
         return;
     }
     weaponData[wpnParms.weaponNum].scopeType = tokenInt;
+}
+
+//--------------------------------------------
+void WPN_Recoil(const char **holdBuf)
+{
+    float        tokenFlt;
+
+    if ( COM_ParseFloat(holdBuf,&tokenFlt))
+    {
+        SkipRestOfLine(holdBuf);
+        return;
+    }
+
+    if ((tokenFlt < 0) || (tokenFlt > 10000 ))
+    {
+        gi.Printf(S_COLOR_YELLOW"WARNING: bad recoil in external weapon data '%d'\n", tokenFlt);
+        return;
+    }
+    weaponData[wpnParms.weaponNum].recoil = tokenFlt;
 }
 
 //--------------------------------------------

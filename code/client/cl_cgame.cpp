@@ -267,6 +267,27 @@ void CL_SetUserCmdAngles( float pitchOverride, float yawOverride, float rollOver
 	cl_overrideAngles = qtrue;
 }
 
+
+/*
+====================
+CL_GetViewAngles
+
+====================
+*/
+void CL_GetViewAngles( vec3_t viewangles ) {
+    VectorCopy( cl.viewangles, viewangles );
+}
+
+/*
+====================
+CL_SetViewAngles
+
+====================
+*/
+void CL_SetViewAngles( const vec3_t viewangles ) {
+    VectorCopy( viewangles, cl.viewangles );
+}
+
 void CL_AddCgameCommand( const char *cmdName ) {
 	Cmd_AddCommand( cmdName, NULL );
 }
@@ -1068,6 +1089,12 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 	case CG_SETUSERCMDANGLES:
 		CL_SetUserCmdAngles( VMF(1), VMF(2), VMF(3) );
 		return 0;
+	case CG_ANGLES_GETVIEW:
+	    CL_GetViewAngles(  (float *) VMA(1) );
+	    return 0;
+	case CG_ANGLES_SETVIEW:
+	    CL_SetViewAngles( (const float *) VMA(1) );
+	    return 0;
 	case COM_SETORGANGLES:
 		Com_SetOrgAngles((float *)VMA(1),(float *)VMA(2));
 		return 0;

@@ -2793,8 +2793,15 @@ Caused by an EV_FIRE_WEAPON event
 */
 void CG_FireWeapon( centity_t *cent, qboolean alt_fire )
 {
+	vec3_t viewangles;
+	int current = cgi_GetCurrentCmdNumber();
+	usercmd_t ucmd;
+
 	entityState_t *ent;
 	//weaponInfo_t	*weap;
+
+	cgi_GetUserCmd( current, &ucmd );
+	cgi_Angles_GetView(viewangles);
 
 	ent = &cent->currentState;
 	if ( ent->weapon == WP_NONE ) {
@@ -2881,6 +2888,34 @@ void CG_FireWeapon( centity_t *cent, qboolean alt_fire )
 			}
 		}
 	}*/
+
+	// Code from JKG
+	if ( ent->number == cg.snap->ps.clientNum )
+	{
+		double pitchRecoil = weaponData[ent->weapon].recoil;
+
+		if (ucmd.upmove < 0 || cg.zoomMode >= ST_A280) 
+		{
+			pitchRecoil /= 2.0f;
+		}
+		
+	    if ( pitchRecoil )
+	    {
+	        double yawRecoil = flrand (0.15 * pitchRecoil, 0.25 * pitchRecoil);
+
+	        if ( Q_irand (0, 1) )
+	        {
+	            yawRecoil = -yawRecoil;
+	        }
+
+	        CGCam_Shake (flrand (0.85f * pitchRecoil, 0.15f * pitchRecoil), 100);
+
+	        viewangles[YAW] += yawRecoil;
+	        viewangles[PITCH] -= pitchRecoil;
+	    }
+	}
+
+	cgi_Angles_SetView(viewangles);
 }
 
 /*

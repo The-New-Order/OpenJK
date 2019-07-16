@@ -1092,6 +1092,9 @@ qboolean	cgi_GetUserCmd( int cmdNumber, usercmd_t *ucmd );
 void		cgi_SetUserCmdValue( int stateValue, float sensitivityScale, float mPitchOverride, float mYawOverride );
 void		cgi_SetUserCmdAngles( float pitchOverride, float yawOverride, float rollOverride );
 
+void 		cgi_Angles_GetView( vec3_t viewangles );
+void 		cgi_Angles_SetView( const vec3_t viewangles );
+
 void		cgi_S_UpdateAmbientSet( const char *name, vec3_t origin );
 void		cgi_AS_ParseSets( void );
 void		cgi_AS_AddPrecacheEntry( const char *name );

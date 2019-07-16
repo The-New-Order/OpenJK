@@ -166,6 +166,8 @@ typedef struct weaponData_s
 
 	int 	scopeType;
 
+	float	recoil;
+
 } weaponData_t;
 
 

@@ -416,6 +416,14 @@ void		cgi_SetUserCmdValue( int stateValue, float sensitivityScale, float mPitchO
 void		cgi_SetUserCmdAngles( float pitchOverride, float yawOverride, float rollOverride ) {
 	Q_syscall( CG_SETUSERCMDANGLES, PASSFLOAT(pitchOverride), PASSFLOAT(yawOverride), PASSFLOAT(rollOverride) );
 }
+
+void    cgi_Angles_GetView( vec3_t viewangles ) {
+    Q_syscall( CG_ANGLES_GETVIEW, viewangles );
+}
+
+void    cgi_Angles_SetView( const vec3_t viewangles ) {
+    Q_syscall( CG_ANGLES_SETVIEW, viewangles );
+}
 /*
 Ghoul2 Insert Start
 */
