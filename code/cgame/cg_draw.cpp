@@ -78,6 +78,77 @@ float cgProtectFadeVal = 0;
 //===============================================================
 
 
+
+static void CG_Drawweapontype(const centity_t *cent, const int xPos, const int yPos)
+{
+	int wp_index;
+
+	if (!cent->currentState.weapon || !cent->gent) // We don't have a weapon right now
+	{
+		return;
+	}
+
+	cgi_R_SetColor(colorTable[CT_WHITE]);
+
+	switch(cent->currentState.weapon)
+	{
+		case WP_SABER:
+			wp_index = OHB_SABER;
+			break;
+		case WP_BLASTER_PISTOL:
+			wp_index = OHB_BLASTER_PISTOL;
+			break;
+		case WP_BLASTER:
+			wp_index = OHB_BLASTER;
+			break;
+		case WP_DISRUPTOR:
+			wp_index = OHB_DISRUPTOR;
+			break;
+		case WP_BOWCASTER:
+			wp_index = OHB_BOWCASTER;
+			break;
+		case WP_REPEATER:
+			wp_index = OHB_REPEATER;
+			break;
+		case WP_DEMP2:
+			wp_index = OHB_DEMP2;
+			break;
+		case WP_FLECHETTE:
+			wp_index = OHB_FLECHETTE;
+			break;
+		case WP_ROCKET_LAUNCHER:
+			wp_index = OHB_ROCKET_LAUNCHER;
+			break;
+		case WP_THERMAL:
+			wp_index = OHB_THERMAL;
+			break;
+		case WP_TRIP_MINE:
+			wp_index = OHB_TRIP_MINE;
+			break;
+		case WP_DET_PACK:
+			wp_index = OHB_DET_PACK;
+			break;
+		case WP_CONCUSSION:
+			wp_index = OHB_CONCUSSION;
+			break;
+		case WP_MELEE:
+			wp_index = OHB_MELEE;
+			break;
+	}
+
+
+	cgi_R_SetColor(otherHUDBits[wp_index].color);
+
+	CG_DrawPic(
+		otherHUDBits[wp_index].xPos,
+		otherHUDBits[wp_index].yPos,
+		otherHUDBits[wp_index].width,
+		otherHUDBits[wp_index].height,
+		otherHUDBits[wp_index].background
+	);
+}
+
+
 /*
 ================
 CG_DrawMessageLit
@@ -543,7 +614,7 @@ static void CG_DrawAmmo(const centity_t	*cent,const int xPos,const int yPos)
 		{
 			if (cg.oldAmmoTime > cg.time)
 			{
-				memcpy(calcColor, colorTable[CT_YELLOW], sizeof(vec4_t));
+				memcpy(calcColor, colorTable[CT_BLACK], sizeof(vec4_t));
 			}
 			else
 			{
@@ -2382,6 +2453,7 @@ static void CG_DrawHUD( centity_t *cent )
 			);
 
 		CG_DrawForcePower(cent,sectionXPos,sectionYPos);
+		CG_Drawweapontype(cent, sectionXPos, sectionYPos);
 
 		// Draw ammo tics or saber style
 		if ( cent->currentState.weapon == WP_SABER )
@@ -4857,7 +4929,7 @@ static void CG_Draw2D( void )
 			//CG_DrawIconBackground();
 		}
 
-		CG_DrawWeaponSelect();
+		//CG_DrawWeaponSelect();
 
 		if ( cg.zoomMode == 0 )
 		{

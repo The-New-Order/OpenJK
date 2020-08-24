@@ -1259,6 +1259,20 @@ HUDMenuItem_t otherHUDBits[] =
 	{ "righthud",	"scanline",				0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_SCANLINE_RIGHT
 	{ "lefthud",	"frame",				0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_FRAME_LEFT
 	{ "righthud",	"frame",				0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_FRAME_RIGHT
+	{ "righthud",	"weapontype_saber",				0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },
+	{ "righthud",	"weapontype_blaster_pistol",	0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },
+	{ "righthud",	"weapontype_e-11_blaster",			0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },
+	{ "righthud",	"weapontype_disruptor",			0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },
+	{ "righthud",	"weapontype_bowcaster",			0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },
+	{ "righthud",	"weapontype_repeater",			0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },
+	{ "righthud",	"weapontype_demp2",				0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },
+	{ "righthud",	"weapontype_flachette",			0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },
+	{ "righthud",	"weapontype_rocket_launcher",	0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },
+	{ "righthud",	"weapontype_thermal",			0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },
+	{ "righthud",	"weapontype_trip_mine",			0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },
+	{ "righthud",	"weapontype_det_pack",			0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },
+	{ "righthud",	"weapontype_concussion",		0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },
+	{ "righthud",	"weapontype_melee",				0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },
 };
 
 
