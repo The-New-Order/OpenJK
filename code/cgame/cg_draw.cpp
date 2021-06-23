@@ -2804,6 +2804,12 @@ static void CG_DrawCrosshair( vec3_t worldPoint )
 	{
 		hShader = cgs.media.crosshairShader[ cg_drawCrosshair.integer % NUM_CROSSHAIRS ];
 
+		if (g_entities[0].s.weapon == WP_BOWCASTER)
+		{
+			w += 90;
+			h += 90;
+		}
+
 		cgi_R_DrawStretchPic( x + cg.refdef.x + 0.5 * (640 - w),
 			y + cg.refdef.y + 0.5 * (480 - h),
 			w, h, 0, 0, 1, 1, hShader );

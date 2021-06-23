@@ -29,7 +29,7 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 #include "../cgame/cg_local.h"
 #include "g_shared.h"
 
-#define	NUM_CROSSHAIRS		9
+#define	NUM_CROSSHAIRS		12
 
 typedef enum {
 	FOOTSTEP_STONEWALK,

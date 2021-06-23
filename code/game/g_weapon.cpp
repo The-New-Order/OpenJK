@@ -1432,6 +1432,7 @@ void FireWeapon( gentity_t *ent, qboolean alt_fire )
 
 	case WP_BOWCASTER:
 		WP_FireBowcaster( ent, alt_fire );
+		gi.cvar_set("cg_drawCrosshair", "9");
 		break;
 
 	case WP_REPEATER:

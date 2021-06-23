@@ -1544,7 +1544,7 @@ void WPN_ShotsPerBurst(const char **holdBuf)
         return;
     }
 
-    if ((tokenInt < 0) || (tokenInt > 10000 ))
+    if ((tokenInt == 128) || (tokenInt <= 0) || (tokenInt > 10000))
     {
         gi.Printf(S_COLOR_YELLOW"WARNING: bad shotsPerBurst in external weapon data '%d'\n", tokenInt);
         return;

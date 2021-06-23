@@ -9119,6 +9119,15 @@ static void PM_FinishWeaponChange( void ) {
 		pm->ps->saberBlocking = BLK_NO;
 		pm->ps->saberBlocked = BLOCKED_NONE;
 	}
+
+	if (pm->ps->weapon == WP_BOWCASTER)
+	{
+		gi.cvar_set("cg_drawCrosshair", "9");
+	}
+	else
+	{
+		gi.cvar_set("cg_drawCrosshair", "1");
+	}
 }
 
 int PM_ReadyPoseForSaberAnimLevel( void )
@@ -13033,8 +13042,6 @@ static bool PM_DoChargedWeapons( void )
 	//	Note that we ALWAYS return if charging is set ( meaning the buttons are still down )
 	if ( charging )
 	{
-
-
 		if ( altFire )
 		{
 			if ( pm->ps->weaponstate != WEAPON_CHARGING_ALT && pm->ps->weaponstate != WEAPON_DROPPING )
@@ -13058,7 +13065,6 @@ static bool PM_DoChargedWeapons( void )
 		}
 		else
 		{
-
 			if ( pm->ps->weaponstate != WEAPON_CHARGING && pm->ps->weaponstate != WEAPON_DROPPING )
 			{
 				if ( pm->ps->ammo[weaponData[pm->ps->weapon].ammoIndex] <= 0)
@@ -13075,6 +13081,20 @@ static bool PM_DoChargedWeapons( void )
 				if ( cg_weapons[pm->ps->weapon].chargeSound && pm->gent && !pm->gent->NPC ) // HACK: !NPC mostly for bowcaster and weequay
 				{
 					G_SoundOnEnt( pm->gent, CHAN_WEAPON, weaponData[pm->ps->weapon].chargeSnd );
+				}
+			}
+
+			if (pm->ps->weapon == WP_BOWCASTER)
+			{
+				int count = ( level.time - pm->ps->weaponChargeTime ) / BOWCASTER_CHARGE_UNIT;
+
+				if (count >= 5)
+				{
+					gi.cvar_set("cg_drawCrosshair", "11");
+				}
+				else if (count > 2)
+				{
+					gi.cvar_set("cg_drawCrosshair", "10");
 				}
 			}
 		}
@@ -13624,7 +13644,7 @@ static void PM_Weapon( void )
 			return;
 		}
 
-		if (pm->ps->firingMode == 1 || pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT)
+		if (pm->ps->firingMode == 1)
 		{
 			// Code from JKG
 			if (pm->ps->shotsRemaining & SHOTS_TOGGLEBIT)
@@ -13635,7 +13655,7 @@ static void PM_Weapon( void )
 				}
 				else if (weaponData[pm->ps->weapon].firingType == FT_BURST)
 				{
-					pm->ps->shotsRemaining = weaponData[pm->ps->weapon].shotsPerBurst & ~SHOTS_TOGGLEBIT;
+					pm->ps->shotsRemaining = weaponData[pm->ps->weapon].shotsPerBurst;
 				}
 			}
 		}
@@ -14555,23 +14575,16 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
 	}
 
-	if (pm->ps->firingMode == 1 || pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT)
+	if (pm->ps->firingMode == 1)
 	{
-		if (pm->gent && (pm->gent->s.number<MAX_CLIENTS||G_ControlledByPlayer(pm->gent)))
+		// Code from JKG
+		if (pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT)
 		{
-			// Code from JKG
-			if (pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT)
+			if (pm->ps->eFlags & EF_FIRING)
 			{
-				if (pm->ps->eFlags & EF_FIRING)
+				if (weaponData[pm->ps->weapon].firingType == FT_BURST)
 				{
-					if (weaponData[pm->ps->weapon].firingType == FT_BURST && pm->ps->pm_type != PM_NOCLIP)
-					{
-						pm->cmd.buttons |= BUTTON_ATTACK;
-					}
-					else if (pm->ps->pm_type == PM_NOCLIP)
-					{
-						pm->ps->shotsRemaining = SHOTS_TOGGLEBIT;
-					}
+					pm->cmd.buttons |= BUTTON_ATTACK;
 				}
 			}
 		}
@@ -14733,7 +14746,7 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		pm->cmd.buttons &= ~(BUTTON_ALT_ATTACK|BUTTON_ATTACK);
 	}
 
-	if (pm->ps->firingMode == 1 || pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT)
+	if (pm->ps->firingMode == 1)
 	{
 		// Code from JKG
 		if ( !(pm->ps->shotsRemaining & ~SHOTS_TOGGLEBIT) 
